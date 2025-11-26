@@ -27,6 +27,20 @@ go.work.sum
 # env file
 .env
 
-# Editor/IDE
-# .idea/
-# .vscode/
+# Editor/IDE/macOS
+.idea/
+.DS_Store
+
+# Hugo
+.hugo_build.lock
+_gen/
+.scss_*
+public/
+
+# Claude/ OpenCode
+CLAUDE.md
+.opencode/
+.claude/
+
+# NPM
+node_modules/

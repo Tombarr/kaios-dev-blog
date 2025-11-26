@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="{{ .Site.Language.Lang }}">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+  {{ $title := .Site.Title }}
+  {{- if not .IsHome }}
+    {{ $title = printf "%s | %s" .Title .Site.Title }}
+  {{ end -}}
+
+  <title>{{ $title }}</title>
+
+  {{- with .Site.Params.author }}
+  <meta name="author" content="{{ . }}">
+  {{ end -}}
+  <meta name="description" content="{{ .Description | default (.Summary | default .Site.Params.description ) }}">
+  <meta name="keywords" content="{{ (delimit .Keywords " ,") | default .Site.Params.keywords }}">
+
+  {{ template "_internal/twitter_cards.html" . }}
+  {{ template "_internal/opengraph.html" . }}
+
+  {{ $header_img := .Scratch.Get "header_img" }}
+
+  {{- if isset .Params "featured_img" -}}
+    <meta name="og:image" content="{{ urls.JoinPath .Site.BaseURL .Params.featured_img }}" />
+    <meta name="twitter:image" content="{{ urls.JoinPath .Site.BaseURL .Params.featured_img }}" />
+  {{- else -}}
+    {{- if $header_img -}}
+      <meta property="og:image" content="{{ urls.JoinPath .Site.BaseURL $header_img }}" />
+      <meta property="twitter:image" content="{{ urls.JoinPath .Site.BaseURL $header_img }}" />
+    {{- end -}}
+  {{- end -}}
+
+  <link rel="stylesheet" href="{{ "css/bootstrap.min.css" | relURL }}"  crossorigin="anonymous">
+
+  {{ $options := (dict "outputStyle" "compressed" "enableSourceMap" (not hugo.IsProduction) "includePaths" (slice
+  "sass")) }}
+  {{- $style := resources.Get "sass/main.scss" | css.Sass $options -}}
+  <link rel="stylesheet" href="{{ $style.RelPermalink }}">
+
+  {{ $zoom_css := resources.Get "zoomjs/zoom.css" | resources.Minify -}}
+  <link rel="stylesheet" href="{{ $zoom_css.RelPermalink }}">
+  <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.3.0/css/all.min.css" rel="stylesheet" type="text/css" media="print" onload="this.media='all'" />
+
+  {{ range .Site.Params.custom_css -}}
+  {{ $custom_template := resources.Get . }}
+  {{ if $custom_template }}
+  {{ $custom_style := $custom_template | css.Sass | resources.Minify }}
+  <link rel="stylesheet" href="{{ $custom_style.RelPermalink }}">
+  {{ end }}
+  {{- end -}}
+
+  <script src={{ "js/lazysizes.min.js" | relURL }} type="text/javascript"></script>
+  <script async src="https://media.ethicalads.io/media/client/ethicalads.min.js" type="text/javascript"></script>
+
+  <!-- custom js -->
+  {{- range .Site.Params.custom_js -}}
+  {{ $custom_template := resources.Get . }}
+  {{ if $custom_template }}
+  {{ $custom_js := $custom_template | resources.Minify | resources.Fingerprint }}
+  <script defer src="{{ $custom_js.RelPermalink }}"></script>
+  {{ end }}
+  {{ end -}}
+
+  {{ range .AlternativeOutputFormats -}}
+  {{ printf `<link rel="%s" type="%s" href="%s" title="%s" />` .Rel .MediaType.Type .RelPermalink $.Site.Title | safeHTML }}
+  {{ end -}}
+
+  {{ if .Site.Params.useFaviconGenerator }}
+  <link rel="apple-touch-icon" sizes="180x180" href="{{ "/apple-touch-icon.png" | relURL }}" />
+  <link rel="icon" type="image/png" sizes="32x32" href="{{ "/favicon-32x32.png" | relURL }}" />
+  <link rel="icon" type="image/png" sizes="16x16" href="{{ "/favicon-16x16.png" | relURL }}" />
+  <link rel="manifest" href="{{ "site.webmanifest" | relURL }}" />
+  <link rel="apple-touch-icon" href="{{ "/apple-touch-icon.png" | relURL }}" />
+  <link rel="shortcut icon" href="{{ "/favicon.png" | relURL }}" type="image/x-icon" />
+  <link rel="shortcut icon" href="{{ "/favicon.ico" | relURL }}" type="image/x-icon" />
+  {{ end }}
+</head>
+
+<!-- hack iOS CSS :active style -->
+
+<body ontouchstart="">
+  {{- $header_img := .Param "header_img" -}}
+  {{- if .IsHome -}}
+  {{ $header_img = .Site.Params.img_home }}
+  {{- else if eq .Kind "404" -}}
+  {{ $header_img = .Site.Params.img_404 }}
+  {{- end -}}
+  {{- if $header_img -}}
+  {{ .Scratch.Set "header_img" ( $header_img | relURL ) }}
+  {{- end -}}
+
+  {{- if and .IsPage (.Params.toc) }}
+  {{ .Scratch.Set "toc" true }}
+  {{ end -}}
+
+  <!-- Nav -->
+  {{ partial "nav.html" . }}
+  {{ partial "search.html" . }}
+
+  <!-- Page Header -->
+  {{ partial "intro-header.html" . }}
+
+  {{ block "main" . }}
+
+  <!-- Main Content -->
+  <div class="container">
+    <div class="row">
+      {{ if eq .Site.Params.sidebar.enable false }}
+
+      <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1
+      postlist-container">
+        {{ block "container" . }}{{ end }}
+      </div>
+      <!-- Sidebar Container -->
+      <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1
+      sidebar-container">
+        <!-- Featured Tags -->
+        {{ partial "featured-tags.html" . }}
+        <!-- Friends Blog -->
+        {{ partial "friends.html" . }}
+      </div>
+
+      {{ else }}
+      <!-- USE SIDEBAR -->
+      <!-- PostList Container -->
+      <div class="col-lg-8 col-lg-offset-1 col-md-8 col-md-offset-1 col-sm-12
+      col-xs-12 postlist-container">
+        {{ block "container" . }}{{ end }}
+      </div>
+      <!-- Sidebar Container -->
+      <div class="col-lg-3 col-lg-offset-0 col-md-3 col-md-offset-0 col-sm-12
+      col-xs-12 sidebar-container">
+
+        <!-- Featured Tags -->
+        {{ partial "featured-tags.html" . }}
+        {{ partial "short-about.html" . }}
+        <!-- Friends Blog -->
+        {{ partial "friends.html" . }}
+
+      </div>
+      {{ end }}
+
+    </div>
+  </div>
+
+  {{ end }}
+
+  {{ partial "footer.html" . }}
+  <style type="text/css">
+    :root img {
+      width: auto !important;
+      max-width: 100% !important;
+    }
+
+    :root .intro-header[style^="background-image"] .site-heading > *,
+    :root .intro-header[style^="background-image"] .post-heading {
+      text-shadow: 1px 1px 3px rgba(0,0,0,.8);
+    }
+
+    :root .intro-header .header-mask + .container h1,
+    :root .intro-header .header-mask + .container h1 + .subheading {
+      text-shadow: 1px 1px 3px rgba(0,0,0,.8)
+    }
+
+    :root footer .copyright {
+      text-align: left;
+      position: relative;
+    }
+
+    @media only screen {
+      :root footer .copyright::before {
+        position: absolute;
+        background-position: top center;
+        background-image: url('/new-icon/apple-touch-icon.png');
+        content: '';
+        display: block;
+        width: 6rem;
+        height: 6rem;
+        background-size: contain;
+        left: -6rem;
+        top: 50%;
+        bottom: 50%;
+        transform: translateY(-50%);
+      }
+
+      :root footer .copyright + .copyright {
+        margin-top: 0.5em;
+      }
+
+      :root footer .copyright + .copyright::before {
+        opacity: 0;
+        background-image: none;
+        visibility: hidden;
+      }
+    }
+
+    @media only screen and (max-width: 992px) {
+      :root footer .copyright::before {
+        left: 50%;
+        bottom: -6rem;
+        top: unset;
+        transform: translate(-50%, 50%);
+      }
+
+      :root footer .copyright {
+        margin-block-end: 8rem;
+      }
+    }
+
+    :root .short-about a img,
+    :root .short-about a:hover img {
+      cursor: pointer;
+    }
+
+    :root [data-ea-publisher] img {
+      cursor: pointer !important;
+    }
+
+    footer [data-ea-type="text"] {
+      margin-top: 2rem;
+    }
+
+    [data-ea-type="text"]:empty,
+    [data-ea-type="image"]:empty {
+      display: none;
+    }
+
+    [data-ea-type="text"]:empty + hr.hidden-sm.hidden-xs,
+    [data-ea-type="image"]:empty + hr.hidden-sm.hidden-xs {
+      display: none;
+    }
+
+    [data-ea-type="text"]::blank,
+    [data-ea-type="image"]::blank {
+      display: none;
+    }
+
+    [data-ea-type="text"]::blank + hr.hidden-sm.hidden-xs,
+    [data-ea-type="image"]::blank + hr.hidden-sm.hidden-xs {
+      display: none;
+    }
+  </style>
+</body>
+</html>

@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Web2Dev 2.0</title>
+    <style type="text/css">
+        body {
+            font-family: PT Sans,sans-serif;
+        }
+
+        p {
+            font-size: 1.1rem;
+            line-height: 1.85;
+        }
+
+        button {
+            display: block;
+        }
+
+        button + button {
+            margin-top: 0.5rem;
+        }
+    </style>
+  </head>
+  <body>
+    <p>Web2Dev (W2D) 2.0</p>
+    <button id="dev">Launch Developer Menu</button>
+    <button id="engmode">Launch Engmode</button>
+    <button id="logs">Launch LogManager</button>
+
+    <script type="text/javascript">
+        (function() {
+
+            function launchDeveloperMenu() {
+                if (typeof MozActivity !== 'undefined') {
+                    let act = new MozActivity({
+                        name: "configure",
+                        data: {
+                            target: "device",
+                            section: "developer"
+                        }
+                    });
+                } else if (typeof WebActivity !== 'undefined') {
+                    let act = new WebActivity("configure", {
+                        target: "device",
+                        section: "developer"
+                    });
+                    act.start()
+                        .catch((e) => alert(e));
+                }
+            }
+
+            function launchEngmode() {
+                window.open('http://engmode.localhost/manifest.webmanifest', '_blank', 'kind=app,noopener=yes');
+            }
+
+            function launchLogmanager() {
+                window.open('http://logmanager.localhost/manifest.webmanifest', '_blank', 'kind=app,noopener=yes');
+            }
+
+            let dev = document.getElementById('dev');
+            dev.addEventListener('click', (e) => {
+                e.preventDefault();
+                launchDeveloperMenu();
+            });
+
+            let engmode = document.getElementById('engmode');
+            dev.addEventListener('click', (e) => {
+                e.preventDefault();
+                launchEngmode();
+            });
+
+            let logs = document.getElementById('logs');
+            logs.addEventListener('click', (e) => {
+                e.preventDefault();
+                launchLogmanager();
+            });
+
+        })();
+    </script>
+  </body>
+</html>

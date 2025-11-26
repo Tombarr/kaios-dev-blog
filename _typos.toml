@@ -1,0 +1,7 @@
+[default.extend-words]
+OT = "OT"
+tunning = "tunning"
+pn = "pn"
+
+[files]
+extend-exclude = ["themes/**"]

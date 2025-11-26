@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>KaiOS 3.0 Web Activities</title>
+    <style type="text/css">
+        button {
+            display: block;
+        }
+
+        button + button {
+            margin-top: 0.5rem;
+        }
+    </style>
+  </head>
+  <body>
+    <section id="details">
+      <p>
+        <span>KaiOS Version:</span>
+        <span id="version"></span>
+      </p>
+      <p>
+        <span>Result:</span>
+        <span id="result"></span>
+      </p>
+    </section>
+
+    <ol>
+        <li>
+            <a href="https://gitlab.com/suborg/wallace-toolbox/-/raw/master/rsrc/adbd.bin?inline=false" download rel="external">adbd.bin</a>
+        </li>
+        <li>
+            <button id="check-adbd" value="check-adbd">Check ADBD</button>
+        </li>
+    </ol>
+
+    <button id="check-apps" value="check-apps">Check Apps</button><br />
+    <button id="check-settings-app" value="check-settings-app">Check Settings App</button><br />
+
+    <button id="build-prop" value="build-prop">Get build.prop</button><br />
+
+    <section id="buttons"></section>
+
+	<script type="text/javascript">
+        (function() {
+            let appIds = [
+                "wildgoatsokoban", "greg", "parceltracker", "feedolin", "foodnutrition", "nightclock", "quran", "mathtraining", "runpaceconverter", "podkast", "cricketlive", "mindreader", "massager", "librivoxaudiobooks", "frequencygenerator", "sunsetsunrise", "noobdraw", "jellydropjam", "midiplayer", "cheeseknifethrower", "mochapodcast", "kainews", "pdftools", "surveysays", "periodtracker", "airportcodes", "mocharss", "tankshootingduels", "periodictable", "funnyanimals", "whereami", "yogaposes", "personaldiary", "wordoftheday", "bubbleshooterblitz", "wordscapes", "rssreader", "alcoholtester", "eclipses", "countrycodes", "pyramidofmemories", "soundmeter", "colorblindness", "moonphase", "txtmsgs", "pastlife", "qrreader", "mousecheeseeater", "numerology", "mochaairquality", "palmistry", "docxreader", "spotthedifference", "bodyweightcalculator", "magicball", "suncompass", "moonmonstersjump", "filter", "masquerade", "mobilearena", "mochavnc", "dice", "monsterhelljump", "bowmanbirdshooting", "randomnumber", "virtualcandle", "myipaddress", "nonogram", "blackjack21", "naturesounds", "cartslidepuzzle", "dinovirtualpet", "hodlinfo", "chess", "radiowaves", "beerpipenetwork", "xlsxreader", "eliza", "magnifyingglass", "geoquiz", "truthordare", "8x8checkers", "photozoom", "mocha4inarow", "decisionroulette", "mochaweather", "spinthatwheel", "iching", "minotauraxedefense", "trendingnow", "kaiosstore", "qrtools", "harvestfarmslots", "pixelart", "kaiweather", "guessthesong", "carstreetracing", "todo", "mocharadio", "eastereggbird", "pdfreader", "undermoonshadow", "nesemulator", "christmassantabox", "easymoneyconverter", "questofthewizards", "wordsinwords", "gpsareameasure", "sudokuclassic", "chocolatematch3", "wordle", "easteregghunt", "tankwarsurvival", "eastereggsmatch", "catandmouse", "ninjaknife", "wallbreaker", "matchthefruits", "nametheanimal", "solitaire95", "warstrikeaircrafts", "fireflynightjump", "soldierfieldjump", "gladiatorsurvival", "icecreammatch", "asteroidshooter", "stacktowerjump", "reversi", "picturequiz", "2pics1word", "diamondgirls", "klondikesolitaire3", "wizardadventure", "chickeneggsurvival", "cowboyshowdown", "rebus", "bananamonkeyescape", "sultangemmatch", "pigeonletterbird", "fruitslidepuzzle", "frogroadhop", "sameblox3", "greenpicklerunner", "zombiebridgesniper", "jungletreejump", "rescuethepenguins", "astronautdrilldash", "dogandcatchase", "dodgethespikes", "drillminer", "circlelinerhythm", "chickenblockjumper", "roulette", "bowmanarrowshooter", "mousefarmjump", "snake99", "ballmazeshooter", "nonograms", "spacealieninvasion", "pingponggoal", "jetpacksantaclaus", "caradrenaline", "icecreamcityjump", "penguinicedefender", "dominoes", "cleversnake", "christmasmemories", "pigrunaway", "halloweenmummydig", "dangerousjetpack", "4pics1word", "bombergemadventure", "sokoban", "bowmanquest", "logoquiz", "nightoftheshadows", "hiddenobjects", "bunnyincarrotmaze", "santacatchinggifts", "planeshooter", "timbermantreecut", "glamourslotmachine", "monsterapplefeeder", "frogparkour", "totemtowerstack", "birdfruitdodging", "easterslidepuzzle", "santaintrouble", "mochachess", "santanorthpolerun", "3dballmaze", "pigsummerjump", "birdcopterescape", "matchespuzzle", "gorillabananaquest", "happyalienjump", "crystalcavememory", "galaxyinvaders", "rivercrossing", "christmasfactory", "snake2023", "bigfootpursuit", "robbercityescape", "gems", "carlogos", "wintersnowsurvival", "christmaspuzzles", "ballsort", "bubbleshooterlab", "reversisolitaire", "whackamole", "snakehunter", "hammerthemoles", "queenpharaohslots", "shortcut", "klondike", "goldminerjack", "tankbattle", "bubbleshooterads", "xraysharkshooter", "counthowmany", "fruitsimagequiz", "memorycardsblitz", "jewels", "swordchallenge", "whackadragon", "squirrelfireescape", "guesstheprofession", "carrotbunnyhop", "fruitslotsclassic", "minesweeper95", "gingerbreadrunner", "crazyeggs", "bananacopterswing", "mahjong", "witchswampescape", "impossiblerush", "vikingmonsterrush", "snakeclassic", "battleshipsolitaire", "busychristmasday", "zigguratescape", "christmasconnect", "flappyduck", "bowmanadventure", "verycrazyscientist", "halloweenpuzzles", "crazysanta", "cowboyjetpackride", "connectdots", "2048ce", "catcityjump", "snowmountainskiing", "sharkeatsthefish", "mochagomoku", "easterbunnyfly", "keepthedoctoraway", "foxmountainjumping", "firejumprescue", "dodohunt", "sportsballmatch", "paintbynumber", "mochacheckers", "drawsum", "pyramidescape", "armybasedefense", "wheeloffortune", "pinballflipper", "cupcakeslidepuzzle", "pipeconnect", "koalajumpingcraze", "greentrouble", "5slotswildcasino", "parkingpuzzle", "monsterappleeaters", "videopoker3", "motochaseracing", "chickenrun", "penguinsnowjump", "cryptograms", "slitherlink", "mafiagangsterbrawl", "lavaescape", "pickacheese", "christmaselfrunner", "lasernight", "lumberjacksanta", "slidingblocks", "mutantalienattack", "templeescape", "rabbitjump", "catchthemoney", "duckshooterclassic", "jetpacksurvivor", "fastcarcityracing", "chaseme", "123fruitsmash", "driftrally", "magicalforestslots", "pyramidadventure", "endlessrunner", "halloweenmatch", "threepointer", "ochristmastree", "reindeermatch", "hellstrikeshooter", "autumnseasonmatch", "lightsout", "tropicalquest", "ninjajumperparkour", "itsrainingbombs", "seashellbubblepop", "namethesportquiz", "burgershop", "pinkcarofmayhem", "pizzafoodmaker", "birdy", "icebreaker", "twinslimeshooters", "moneyoftheworld", "spaceshooter", "bingo", "monkeyforestjump", "spacebricks", "astronautinspace", "hungrybirds", "escapefromdeepsea", "wildspaceslots", "crazyfootballjuggle", "donot", "santaclausjump", "hexagonmatch", "knightforestrescue", "namethefoodquiz", "santareindeerfly", "angrychicken", "summerseamatch3", "rabbitspringjump", "blocksandlines", "cavityspacejump", "2048", "bubbleballsorting", "yummyfoodmatch", "cakematchsweetjam", "scaryhalloweenjump", "1010", "spaceshipflight", "deepseaslots", "platformtowerfall", "fishseachase", "christmasslots", "hungrylilly", "jumpnduck", "mazeracing", "airhockey", "santaiceescape", "tictactoe", "mermaidadventure", "spacemansurvival", "basketballhoops", "planet", "easterbunnyslots", "spookyghostjump", "stackbuilding", "jigsaw", "nightcitydash", "battleship", "cavemandinohunter", "heneedstobefed", "savethepirate", "colorlines", "monstermaze", "freecell", "halloweenslots", "reddragonflight", "birdegghatching", "pyramidrunner", "brickbreaker2018", "happybirdjump", "seabattle", "geographyimagequiz", "dungeoncrawler", "memorycards", "endlessmonsterrun", "guardians", "gorillajunglerun", "frogstuckintraffic", "tictactoelite", "girlfashionmatch3", "goldenneondefence", "podlp", "notrealapp", "antitheft", "bluetooth", "calculator", "calendar", "callscreen", "camera", "clock", "communications", "contact", "customization", "download", "email", "emergency-call", "filemanager", "fm", "fota", "ftu", "gallery", "cached", "googlesearch", "kaios-news", "kaios-pay", "kaios-store", "kaios-weather", "keyboard", "launcher", "loginpages", "mmitest", "music", "network-alerts", "notes", "ringtones", "settings", "shared", "sms", "soundrecorder", "stk", "system", "kaios-todo", "video", "wallpaper", "wappush", "youtube", "snake", "kaios-2048", "kaios-gems", "kaios-guardians", "kaios-birdy", "kaios-whackamole"
+            ];
+
+            let gaiaIcons = [
+                'warning', 'sim-0', 'sim-1', 'signal-0', 'signal-3', 'signal-5',
+                'alert-32px', 'lock', 'numeric_2_4', 'info', 'go-to-end',
+                'browser-scroller', 'browser-zoomout', 'browser-zoomin',
+            ];
+            let randomIcon = gaiaIcons[Math.floor(Math.random() * gaiaIcons.length)];
+
+            const testWallpaper = 'https://www.bing.com/th?id=OHR.FireFallYosemite_EN-US1696286356_240x320.jpg';
+
+            const activities = {
+                "launch-customization": null,
+                "antitheft-ring": null,
+                "getCallLogList": {
+                    type: "calllog/tel",
+                },
+                "call-log": null,
+                "setalarm": {
+                    type: "getall",
+                },
+                "pick": {
+                    type: "application/*",
+                },
+                "launch-fota": null,
+                "settings-fota": null,
+                "notices-updated": null,
+                "kaistore-get-silent-apps": null,
+                "kaistore-push-register": null,
+                "kaistore-show-greeting": null,
+                "launch-store": {
+                    action: "open-appspanel",
+                    detail: {
+                        categoryCode: 110, // Education
+                    },
+                },
+                "speed-dial-list": {
+                    type: "webcontacts/contact",
+                },
+                "mmitest": null,
+                "logmanager": null,
+                "alert_inbox": null,
+                "test_alert_inbox": null,
+                "internal-system-engineering-mode": null,
+                "engmode": null,
+                "chameleontest": null,
+                "jrdlog": null,
+                "dmconfiguration": null,
+                "configure": {
+                    target: "device",
+                    section: "developer",
+                },
+                "configure-window": {
+                    target: "device",
+                    section: "developer",
+                },
+                "moz_configure_window": {
+                    target: "device",
+                    section: "developer",
+                },
+                "set-wallpaper": {
+                    type: "image/*",
+                    number: 1,
+                },
+                "reboot-device": null,
+                "reboot-device-now": null,
+                "offline-dialog": null, // !window.isOnline
+                "show-toast": {
+                    title: 'Test Toast',
+                    gaiaIcon: randomIcon,
+                    text: 'This is the message',
+                    timeout: (5 * 1000),
+                },
+                "aml-msg": {
+                    id: 122,
+                    data: { },
+                },
+                "sysproptest": null,
+                "latest-message": null,
+                "open-notices": null, // When top app isHomescreen
+                "app-data-clean": null, // When top app is Settings
+                "browser-open-top": null,
+                "browser-top": null,
+                "eventlogger-event": null,
+                "voicemail": null,
+                "voice-assistant": {
+                    from: "Internet", // "System"
+                },
+                "voice-input": {
+                    from: "Keyboard",
+                    type: "text",
+                },
+                "kaipay": {
+                    type: "get-loaded-version",
+                },
+                "get-otp": null,
+                "screenshot": null,
+            };
+
+            const engmodeURL = "http://127.0.0.1:2929";
+
+            class RemoteDebugger {
+                constructor() {
+
+                }
+
+                readFile(name) {
+                    let url = new URL(engmodeURL);
+                    url.searchParams.append('cmd', 'bash');
+                    url.searchParams.append('cmdshell', 'cat ' + name);
+                    url.searchParams.append('cmd', 'bash');
+
+                    return this.runXHRequest(url);
+                }
+
+                getproperty(key) {
+                    let url = new URL(engmodeURL);
+                    url.searchParams.append('cmd', 'bash');
+                    url.searchParams.append('cmdshell', 'get_sys_property');
+                    url.searchParams.append('key', key);
+
+                    return this.runXHRequest(url);
+                }
+
+                setproperty(key, value) {
+                    let url = new URL(engmodeURL);
+                    url.searchParams.append('cmd', 'bash');
+                    url.searchParams.append('cmdshell', 'set_sys_property');
+                    url.searchParams.append('key', key);
+                    url.searchParams.append('data', value);
+
+                    return this.runXHRequest(url);
+                }
+
+                readFileCommand(path) {
+                    let url = new URL(engmodeURL);
+                    url.searchParams.append('cmd', 'bash');
+                    url.searchParams.append('cmdshell', 'readfile');
+                    url.searchParams.append('filename', path);
+
+                    return this.runXHRequest(url);
+                }
+
+                runXHRequest(url) {
+                    let xhr = new XMLHttpRequest();
+                    xhr.open("POST", engmodeURL, true);
+
+                    return new Promise(function(resolve, reject) {
+                        xhr.onload = function() {
+                            resolve(xhr.response);
+                        };
+                        xhr.onerror = function(e) {
+                            reject(e);
+                        };
+                        xhr.send(url.search.substring(1));
+                    });
+                }
+            }
+
+            let container = document.getElementById('buttons');
+            let result = document.getElementById('result');
+            let version = document.getElementById('version');
+            let buildProp = document.getElementById('build-prop');
+            let checkApps = document.getElementById('check-apps');
+            let fragment = document.createDocumentFragment();
+
+            let remoteDebugger = new RemoteDebugger();
+
+            buildProp.addEventListener('click', () => {
+                remoteDebugger.readFileCommand('system/build.prop')
+                    .then((response) => {
+                        result.innerHTML = response.replace('\n', '<br />');
+                    })
+                    .catch((e) => {
+                        alert(e);
+                    });
+            });
+
+            // Display version
+            let verFrag = navigator.userAgent.toUpperCase().split('KAIOS')[1];
+            verFrag = (((verFrag || '').split(' ')[0] || '').split('/')[1] || '');
+            version.innerText = verFrag || 'N/A';
+
+            let hasWebActivity = (typeof WebActivity !== 'undefined');
+            let hasMozActivity = (typeof MozActivity !== 'undefined');
+
+            if (!(hasWebActivity || hasMozActivity)) {
+                result.innerText = 'Web Activity not available';
+            }
+
+            // KaiOS 2.5 and 3.0 compatible activities
+            function launchActivity(name, data) {
+                if (hasMozActivity) {
+                    return new Promise(function(resolve, reject) {
+                        let activity = new MozActivity({ name: name, data: data });
+                        activity.onsuccess = function(r) { return resolve(r); };
+                        activity.onerror = function(e) { return reject(e); };
+                    });
+                } else if (hasWebActivity) {
+                    let activity = new WebActivity(name, data);
+                    return activity.start();
+                }
+
+                return Promise.resolve(null);
+            }
+
+            let wallpaperBlob = null;
+
+            function getWallpaperBlob() {
+                if (wallpaperBlob) {
+                    return Promise.resolve(wallpaperBlob);
+                }
+
+                return fetch(testWallpaper)
+                    .then(function(r) { return r.blob(); })
+                    .then(function(b) {
+                        wallpaperBlob = b;
+                        activities["set-wallpaper"].number = 1;
+                        activities["set-wallpaper"].blobs = [wallpaperBlob];
+                        return b;
+                    });
+            }
+
+            // Create buttons
+            Object.entries(activities).forEach(function(objArr) {
+                let name = objArr[0];
+                let data = objArr[1];
+                let button = document.createElement('button');
+                button.value = name;
+                button.innerText = name;
+
+                // Display results
+                const setResult = function(r, level) {
+                    console[level || 'log'](r);
+                    let status = (level === 'warn') ? ' error!' : ' success!';
+                    try {
+                        result.innerText = JSON.stringify(r, null, 4) + '\n' + name + status;
+                    } catch (_) {
+                        result.innerText = name + status;
+                    }
+                };
+
+                if (name === "set-wallpaper") {
+                    button.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        requestAnimationFrame(function() {
+                            // Fetch wallpaper for set-wallpaper activity
+                            getWallpaperBlob()
+                                .catch(function(err) { console.warn(err); })
+                                .finally(function() {
+                                    launchActivity(name, data)
+                                        .then(setResult)
+                                        .catch(function(err) { setResult(err, 'warn'); });
+                                });
+                        });
+                    })
+                } else {
+                    // Click Event handler
+                    button.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        launchActivity(name, data)
+                            .then(setResult)
+                            .catch(function(e) { setResult(e, 'warn'); });
+                    });
+                }
+
+                fragment.appendChild(button);
+            });
+
+            container.appendChild(fragment);
+
+            function checkApp(id) {
+                return fetch(`http://${id}.localhost/manifest.webmanifest`)
+                        .then((r) => r.json());
+            }
+
+            document.getElementById('check-settings-app').addEventListener('click', () => {
+                requestAnimationFrame(() => {
+                    checkApp('settings')
+                        .then((r) => {
+                            result.innerText = JSON.stringify(r, null, 2);
+                        });
+                });
+            });
+
+            function checkInstalledApps() {
+                return Promise.all(
+                        appIds.map((id) =>
+                            fetch(`http://${id}.localhost/manifest.webmanifest`)
+                                .then((r) => r.json())
+                                .then((r) => ({ id: id, icons: r.icons, version: (r.b2g_features) ? r.b2g_features.version : undefined, name: r.name }))
+                                .catch((e) => ({ id: id, error: e }))
+                    )
+                );
+            }
+
+            function getIconImg(id, icons) {
+                if (!(Array.isArray(icons) && icons.length)) return null;
+                let icon = icons[icons.length - 1];
+                if (!(icon && icon.src)) return null;
+                let iconUrl = new URL(`http://${id}.localhost/`);
+                iconUrl.pathname = icon.src;
+                let img = document.createElement('img');
+                img.src = iconUrl.toString();
+                img.alt = id;
+                img.width = '36px';
+                img.height = '36px';
+                return img;
+            }
+
+            // /data/b2g/mozilla/tklycjt8.default/downloads.json
+            // /data/b2g/mozilla/tklycjt8.default/notificationstore.json
+
+            function onAppLinkClick(id) {
+                return () => {
+                    try {
+                        let wnd = window.open(`http://${id}.localhost/manifest.webmanifest`, '_blank', 'kind=app,noopener=yes');
+                        if (!wnd) {
+                            alert('Cannot open app ' + id);
+                        }
+                    } catch (e) {
+                        alert('Error: ' + e.name + ' ' + e.message);
+                    }
+                };
+            }
+
+            function getAppList(apps) {
+                let ul = document.createElement('ul');
+                apps.forEach((app) => {
+                    let li = document.createElement('li');
+                    let a = document.createElement('a');
+                    li.addEventListener('click', onAppLinkClick(app));
+                    let span = document.createElement('span');
+                    if (Array.isArray(app.icons) && app.icons.length) {
+                        let img = getIconImg(app.id, app.icons);
+                        if (img) {
+                            a.appendChild(img);
+                        }
+                    }
+                    span.innerText = (app.name || app.id) + ((app.version) ? ' v' + app.version : '');
+                    a.appendChild(span);
+                    li.appendChild(a);
+                    ul.appendChild(li);
+                })
+                return ul;
+            }
+
+            checkApps.addEventListener('click', () => {
+                result.innerText = 'Checking apps...';
+                requestAnimationFrame(() => {
+                    checkInstalledApps()
+                        .then((apps) => {
+                            let success = apps.filter((app) => app.name || Array.isArray(app.icons));
+                            let fail = apps.filter((app) => app.error);
+                            if (success.length > 0) {
+                                let appHtml = getAppList(success);
+                                result.innerHTML = '';
+                                result.appendChild(appHtml);
+                            } else if (fail.length > 0) {
+                                result.innerText = 'Error: ' + (fail[0].error) ? fail[0].error.name + ' ' + fail[0].error.message : 'Unknown';
+                            } else {
+                                result.innerText = 'No data';
+                            }
+                        })
+                        .catch((e) => {
+                            result.innerText = 'Error: ' + e.message;
+                        });
+                });
+            });
+        })();
+    </script>
+  </body>
+</html>

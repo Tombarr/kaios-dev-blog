@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>CVE-2023-XXXXX: KaiOS 3.0 EngmodeManager OS Command Injection</title>
+    <style type="text/css">
+        body {
+            font-family: PT Sans,sans-serif;
+        }
+
+        p {
+            font-size: 1.1rem;
+            line-height: 1.85;
+        }
+
+        code {
+            font-size: 1rem;
+        }
+
+        button {
+            display: block;
+        }
+
+        button + button {
+            margin-top: 0.5rem;
+        }
+
+        summary {
+            display: block;
+            max-width: 400px;
+            background-color: #f5f5f5;
+            padding: 1rem;
+        }
+
+        code.block {
+            display: block;
+            white-space: pre;
+        }
+
+        #result {
+            display: block;
+            white-space: pre-wrap;
+        }
+    </style>
+  </head>
+  <body>
+    <h1>CVE-2023-XXXXX: EngmodeManager OS Command Injection</h1>
+    <summary>
+        <p>
+            Vendor: KaiOS Technologies Inc.<br />
+            Vendor URL: <a href="https://www.kaiostech.com/" rel="external noopener" referrerpolicy="strict-origin-when-cross-origin">https://www.kaiostech.com/</a><br />
+            Versions affected: KaiOS 3.0, KaiOS 3.1<br />
+            Systems Affected: KaiOS-based mobile devices<br />
+            Author: <a href="https://barrasso.me" rel="external noopener" referrerpolicy="strict-origin-when-cross-origin">Tom Barrasso</a>, discovered by <a href="https://git.abscue.de/affe_null" rel="external noopener">Affe Null</a><br />
+            CVE Identifier: <a href="https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2023-XXXXX">CVE-2023-XXXXX</a><br />
+            Risk: Medium
+        </p>
+    </summary>
+    <h3>Summary</h3>
+    <p>
+        KaiOS is a mobile operating system based on Firefox OS. The operating system comes with an engineering mode extension API named "EngmodeManager" that is vulnerable to OS command injection.
+        An attacker with physical access to the device can abuse this vulnerability to execute arbitrary OS commands as the root user.
+    </p>
+    <h3>Location</h3>
+    <ul>
+        <li>Build: <code>/system/b2g/omni.ja</code></li>
+        <li>Source: <code>/system/b2g/omni/modules/EngmodeManager.jsm</code></li>
+    </ul>
+    <h3>Impact</h3>
+    <p>
+        An attacker with physical access to the mobile device can execute arbitrary OS commands as the root user via the EngmodeManager API available at <code>navigator.b2g.engmodeManager</code>. Access to this API is limited to Certified applications that hold the <code>engmode</code> permission.
+        This includes pre-installed system applications, which have historically been exploited for HTML and JavaScript injection (see <a href="https://www.cvedetails.com/vulnerability-list.php?vendor_id=19715&product_id=52574&version_id=0&page=1&hasexp=0&opdos=0&opec=0&opov=0&opcsrf=0&opgpriv=0&opsqli=0&opxss=0&opdirt=0&opmemc=0&ophttprs=0&opbyp=0&opfileinc=0&opginf=0&cvssscoremin=0&cvssscoremax=0&year=0&cweid=0&order=1&trc=6&sha=85f5cdfc161178ec9114c2608ea7811c41d4ae57" rel="external noopener">CVE-2019-14756 to CVE-2019-14760</a>), or certified third-party applications installed via the KaiStore.
+    </p>
+    <p>
+        <code class="block">
+            // Real-world usage
+            navigator.b2g.engmodeManager.execCmdLE(["bt_radio_run", "", "/data/testbox_log/bt_radio_run.txt"], 3);
+
+            // Illustrative example of command injection
+            navigator.b2g.engmodeManager.execCmdLE(["predefined-command", " ; injected-command"], 2);
+        </code>
+        The code below is a simplified example of the method found in <code>EngmodeManager.jsm</code> that actually executes commands, joined as strings.
+        This appears to be used to pass parameters to the pre-defined list of commands, but can be used to run multiple commands in a single line separated by a semi-colon.
+        <code class="block">
+            const defaultAllowCmdList = {
+                data_nfc_upper: "mkdir -p /data/nfc; touch /data/nfc/test_result; chmod -R 775 /data/nfc",
+                data_kaioslog_upper: "chmod -R 755 /data/kaioslog",
+                data_testbox_upper: "chmod -R 755 /data/testbox_log",
+                data_pidpptt_upper: "chmod 0774 /data/misc/wifi/pid.ptt",
+                kaiosreboot: "reboot",
+                delete_kaioslog_file: "rm -r",
+                wifitest_power: "/system/bin/wifitest power > /data/testbox_log/wifitext.txt",
+                wifitest_tx_cmd: "/system/bin/wifitest tx cmd > /data/testbox_log/wifitest.txt",
+                wifitest_tx_stop: "/system/bin/wifitest tx stop > /data/testbox_log/wifitext_stop.txt",
+                bt_radio_run: "/system/bin/bt_radio_run > /data/testbox_log/bt_radio_run.txt",
+                bt_radio_stop: "/system/bin/bt_radio_stop",
+                btTx_start: "/system/bin/btTx_start > /data/testbox_log/btTx_start.txt",
+                btTx_run: "/system/bin/btTx_run",
+                bttest: "bttest",
+                bttestdisable: "bttest disable",
+                gps_test: "/system/bin/gps_test",
+                test_pn547_1: "/system/bin/test_pn547 1 > /data/testbox_log/nfc.txt",
+                rmgps: "rm -r /data/testbox_log/gps_info.txt",
+            }
+
+            function _isCurrentParam(aParam, length) {
+                if (">" != aParam.match(">") && length > aParam.length) {
+                    return true;
+                }
+                return false;
+            }
+
+            function _isCurrentPathtoAllow(path) {
+                if (1 <= path.length && !path.match(/\.\.\//g)) {
+                    let allow_lists = ["/storage/sdcard/*", "/data/kaioslog/*", "/data/logmanager/*", "/data/testbox_log/*", "/system/system.ver", "/proc/study.ver", "/data/userdata.ver", "/system/b2g/defaults/pref/user.js", "/data/nfc_pcd.txt", ];
+                    console.verbose(" _isCurrentPathtoAllow: path = " + path);
+                    if (new RegExp(allow_lists.join("|")).test(path)) {
+                        return true;
+                    }
+                }
+                return false;
+            }
+
+            function execCmdLE(aParam) {
+                let aParamAarry = aParam.split(",");
+                let aLength = aParamAarry.length;
+                var mTempCommand = aParamAarry[0];
+                if (Object.keys(defaultAllowCmdList).includes(aParamAarry[0]) && !!aParamAarry.length && aParamAarry.length <= 3) {
+                    var mCurrentParam = defaultAllowCmdList[mTempCommand];
+                    var command = null;
+                    if (3 == aLength && _isCurrentParam(aParamAarry[1], 256) && _isCurrentParam(aParamAarry[2], 1024)) {
+                        var isCurPathAllow = this._isCurrentPathtoAllow(aParamAarry[2]);
+                        if (true === isCurPathAllow) {
+                            command = mCurrentParam + " " + aParamAarry[1] + " > " + aParamAarry[2];
+                        }
+                    } else if (2 == aLength && _isCurrentParam(aParamAarry[1], 256)) {
+                        if ("stop" == aParamAarry[1] && "gps_test" == aParamAarry[0]) {
+                            console.log("Engmode:EngmodeTestCommand", "operation: stop");
+                            Services.cpmm.sendAsyncMessage("Engmode:EngmodeTestCommand", {
+                                operation: "stop",
+                            });
+                        }
+                        command = mCurrentParam + " " + aParamAarry[1];
+                    } else if (1 == aLength) {
+                        command = mCurrentParam;
+                    }
+                    console.log("execCmdLE: command = " + command);
+
+                    // calls _engmodeTestCommandMsgHdl, executes /system/bin/sh -c ${command}
+                    Services.cpmm.sendAsyncMessage("Engmode:EngmodeTestCommand", {
+                        param: command,
+                        useShell: true,
+                        operation: "start",
+                        requestID: aResolverId,
+                    });
+                } else {
+                    console.warn("invalid parameter");
+                }
+            }
+        </code>
+    </p>
+    <h3>Recommendation</h3>
+    <p>
+        <ul>
+            <li>Remove unnecessary engineering applications from production builds</li>
+            <li>Perform input validation on all inputs to the EngmodeManager API to prevent OS command injection</li>
+            <li>Limit which applications are given the "engmode" permission</li>
+        </ul>
+    </p>
+    <h3>Vendor Communication Timeline</h3>
+    <ul>
+        <li>5/2/23: Tom emailed security@kaiostech.com asking for PGP key used for secure communication.</li>
+        <li>5/5/23: Tom disclosed issues to KaiOS Technologies.</li>
+        <li>5/8/23: KaiOS Technologies acknowledged this issue.</li>
+        <li>5/15/23: Tom asked for the current remediation status.</li>
+    </ul>
+  </body>
+</html>

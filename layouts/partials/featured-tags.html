@@ -1,0 +1,18 @@
+<section>
+  {{ $bottom := .Scratch.Get "bottom" }}
+  {{ if $bottom }}
+  <hr class="hidden-sm hidden-xs">
+  {{ end }}
+  <div data-ea-publisher="kaiosdev" data-ea-type="image"></div>
+  <hr class="hidden-sm hidden-xs">
+  <h5>FEATURED TAGS</h5>
+  <div class="tags">
+    {{- $.Scratch.Set "myLimit" 0 }}
+      {{- range $name, $items := .Site.Taxonomies.tags.ByCount }}
+      {{- $.Scratch.Set "myLimit" (add ($.Scratch.Get "myLimit") 1) }}
+      {{- if le ($.Scratch.Get "myLimit") ($.Site.Param `tagsLimit`) }}
+        <a href="{{ .Page.RelPermalink }}">{{ .Page.Title }}</a>
+      {{- end }}
+    {{- end }}
+  </div>
+</section>
