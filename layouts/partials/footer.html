@@ -31,19 +31,31 @@
   </div>
 </footer>
 
-<script type="text/javascript" src={{ "js/jquery.min.js" | relURL }}></script>
-<script type="text/javascript" src={{"js/bootstrap.min.js" | relURL }} crossorigin="anonymous"></script>
+<script type="text/javascript" src="{{ "js/jquery.min.js" | relURL }}"></script>
+<script type="text/javascript" src="{{ "js/bootstrap.min.js" | relURL }}"></script>
 
 <!-- Custom Theme JavaScript -->
 {{ $mainJs := resources.Get "js/hux-blog.js" | minify | fingerprint }}
 <script type="text/javascript" src="{{ $mainJs.RelPermalink }}"></script>
 
-<!-- Simple Jekyll Search -->
-<script type="text/javascript" src={{ "js/simple-jekyll-search.min.js" | relURL }}></script>
+<!-- DocSearch -->
+{{- $docsearchJs := resources.Get "js/docsearch.js" | fingerprint -}}
+<script src="{{ $docsearchJs.RelPermalink }}" integrity="{{ $docsearchJs.Data.Integrity }}"></script>
+<script type="text/javascript">
+  (() => {
+    if (typeof docsearch === 'undefined') {
+      console.warn('DocSearch not available');
+      return;
+    }
 
-{{ $searchJs := resources.Get "js/search.js" | resources.ExecuteAsTemplate "js/search.js" . | minify | fingerprint }}
-<script type="text/javascript" src="{{ $searchJs.RelPermalink }}"></script>
-
+    docsearch({
+      container: '#docsearch',
+      appId: 'ADPCI8VLG1',
+      indexName: 'KaiOS.dev Crawler',
+      apiKey: '512be7e64562ac159966aab99d7bcc62',
+    });
+  })();
+</script>
 
 {{ if eq .Type "archive" }}
 {{ $archiveJS := resources.Get "js/archive.js" | minify | fingerprint }}
@@ -103,10 +115,5 @@
 
 {{ end }}
 
-
-{{ if not hugo.IsServer }}
-{{ template "_internal/google_analytics.html" . }}
-{{ end }}
-
-{{ $zoom_js := resources.Get "zoomjs/zoom.js" | resources.Minify }}
-<script type="text/javascript" src="{{ $zoom_js.RelPermalink }}"></script>
+{{ $zoom_js := resources.Get "zoomjs/zoom.js" | resources.Minify | fingerprint }}
+<script type="text/javascript" src="{{ $zoom_js.RelPermalink }}" integrity="{{ $zoom_js.Data.Integrity }}"></script>
