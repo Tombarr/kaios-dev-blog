@@ -32,7 +32,6 @@
 </footer>
 
 <script type="text/javascript" src="{{ "js/jquery.min.js" | relURL }}"></script>
-<script type="text/javascript" src="{{ "js/bootstrap.min.js" | relURL }}"></script>
 
 <!-- Custom Theme JavaScript -->
 {{ $mainJs := resources.Get "js/hux-blog.js" | minify | fingerprint }}
@@ -94,7 +93,7 @@
 </script>
 
 {{ $navJs := resources.Get "js/jquery.nav.js" | minify | fingerprint }}
-<script type="text/javascript" src='{{ $navJs.RelPermalink }}'></script>
+<script type="text/javascript" src="{{ $navJs.RelPermalink }}"></script>
 <script type="text/javascript">
    $(document).ready( function () {
     $('.catalog-body').onePageNav({

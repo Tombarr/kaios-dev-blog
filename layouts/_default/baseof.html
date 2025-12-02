@@ -42,10 +42,11 @@
 
   {{ $zoom_css := resources.Get "zoomjs/zoom.css" | resources.Minify -}}
   <link rel="stylesheet" href="{{ $zoom_css.RelPermalink }}" integrity="{{ $zoom_css.Data.Integrity }}" />
-  <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.3.0/css/all.min.css" rel="stylesheet" type="text/css" media="print" onload="this.media='all'" />
   {{- $docsearchStyle := resources.Get "css/docsearch.css" | fingerprint -}}
   <link rel="stylesheet" href="{{ $docsearchStyle.RelPermalink }}" integrity="{{ $docsearchStyle.Data.Integrity }}" />
+
   <link crossorigin href="https://adpci8vlg1-dsn.algolia.net" rel="preconnect" />
+  <link crossorigin href="https://media.ethicalads.io" rel="preconnect" />
 
   {{ range .Site.Params.custom_css -}}
   {{ $custom_template := resources.Get . }}
@@ -152,6 +153,48 @@
 
   {{ partial "footer.html" . }}
   <style type="text/css">
+    /* -- Search (DocSearch) -- */
+
+    :root .DocSearch-Button-Placeholder,
+    :root .DocSearch-Button-Keys,
+    :root .DocSearch-Footer {
+      display: none;
+    }
+
+    :root .DocSearch-Button-Container svg {
+      color: white;
+    }
+
+    :root .DocSearch-Button {
+      background-color: transparent;
+      border: none;
+      max-height: 20px;
+      transform: scale(1.2);
+      transition: transform 0.2s ease-in-out;
+    }
+
+    :root #docsearch {
+      position: relative;
+    }
+
+    :root #docsearch:hover .DocSearch-Button  {
+      transform: scale(1.33);
+    }
+
+    @media (max-width: 767px) {
+      :root #docsearch::after {
+        content: " Search";
+        display: inline-block;
+      }
+
+      :root #docsearch .DocSearch-Button {
+        opacity: 0;
+        width: 100%;
+        position: absolute;
+        max-height: 28px;
+      }
+    }
+
     :root img {
       width: auto !important;
       max-width: 100% !important;

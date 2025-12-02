@@ -42,11 +42,6 @@ enableEmoji = true
     url = "/"
     weight = -100
   [[menu.main]]
-    identifier = "advanced-development"
-    name = "Advanced Development"
-    url = "/series/advanced-development/"
-    weight = 20
-  [[menu.main]]
     identifier = "getting-started"
     name = "Getting Started"
     url = "/series/getting-started/"

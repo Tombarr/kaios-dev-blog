@@ -1,0 +1,67 @@
+{{- $socialMap := resources.Get "data/social.toml" | transform.Unmarshal -}}
+{{ $socialList := slice }}
+{{- range $key, $value := .social -}}
+  {{ if $value }}
+  {{- $social := $key | lower | index $socialMap | default dict -}}
+  {{- if reflect.IsMap $value -}}
+    {{- $social = merge $social $value -}}
+  {{- else if and $social (ne $value true)  -}}
+    {{ $social = merge $social (dict "id" $value) }}
+  {{- else if $value -}}
+  {{- else -}}
+  {{ $social = dict }}
+  {{- end -}}
+  {{- with $social -}}
+  {{ $socialList = $socialList | append (dict "title" $key | merge $social) }}
+  {{- end -}}
+  {{ end }}
+{{- end -}}
+<style type="text/css">
+.fa-stack-local {
+  position: relative;
+  display: inline-block;
+  width: 2em;
+  height: 2em;
+  line-height: 2em;
+  vertical-align: middle;
+}
+.fa-stack-local svg {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+}
+.fa-stack-1x { transform: scale(0.5); }
+</style>
+{{- if .center -}}
+<ul class="list-inline text-center">
+{{- else -}}
+<ul class="list-inline">
+{{- end -}}
+{{- range sort $socialList "weight" -}}
+{{ $destination := "" }}
+{{ if .url }}
+{{ $destination = .url | relURL }}
+{{ else if .format }}
+{{ $destination = printf (string .format) .id }}
+{{- end -}}
+<li>
+  <a href="{{ $destination | safeURL }}" {{- if (urls.Parse $destination).Host | or .newtab }} target="_blank" {{- end -}}>
+    <span class="fa-stack-local fa-lg">
+      <!-- Background Circle -->
+      <svg viewBox="0 0 512 512" style="color: inherit;"><path fill="currentColor" d="M256 8C119 8 8 119 8 256s111 248 248 248 248-111 248-248S393 8 256 8z"/></svg>
+      
+      <!-- Icon -->
+      {{ $key := .title | lower }}
+      {{ if eq $key "github" }}
+        <svg class="fa-stack-1x" viewBox="0 0 496 512" style="color: white;"><path fill="currentColor" d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-5.9-.2-21.8-.2-42-68 14.8-82.3-32.6-82.3-32.6-11.6-29.5-28.5-37.3-28.5-37.3-22.1-15 1.7-14.8 1.7-14.8 24.4 1.7 37.2 25.1 37.2 25.1 21.7 37.2 57.1 26.6 71.1 20.3 2.2-15.7 8.5-26.5 15.5-32.6-54.1-6.1-111-27-111-120.2 0-26.5 9.4-48.1 25.2-65-2.5-6.1-10.9-30.7 2.4-64.2 0 0 20.4-6.5 66.8 24.8 19.4-5.4 40.1-8.1 60.6-8.1 20.5 0 41.1 2.7 60.6 8.1 46.4-31.4 66.8-24.8 66.8-24.8 13.3 33.5 4.9 58.1 2.4 64.2 15.8 16.9 25.2 38.5 25.2 65 0 93.5-57 114-111.3 120.2 8.7 7.6 16.6 22.5 16.6 45.4 0 32.7-.2 59-.2 67 0 6.6 4.4 14.5 17.4 12.1C426.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"/></svg>
+      {{ else if eq $key "linkedin" }}
+         <svg class="fa-stack-1x" viewBox="0 0 448 512" style="color: white;"><path fill="currentColor" d="M100.28 448H7.4V148.9h92.88zM53.79 108.1C24.09 108.1 0 83.5 0 53.8a53.79 53.79 0 0 1 107.58 0c0 29.7-24.1 54.3-53.79 54.3zM447.9 448h-92.68V302.4c0-34.7-.7-79.2-48.29-79.2-48.29 0-55.69 37.7-55.69 76.7V448h-92.78V148.9h89.08v40.8h1.28c12.4-23.5 42.69-48.3 87.88-48.3 94 0 111.28 61.9 111.28 142.3V448z"/></svg>
+      {{ else if eq $key "rss" }}
+         <svg class="fa-stack-1x" viewBox="0 0 448 512" style="color: white;"><path fill="currentColor" d="M128.081 415.959c0 35.355-28.665 64.02-64.041 64.02C28.665 479.979 0 451.314 0 415.959c0-35.355 28.665-64.02 64.04-64.02 35.376 0 64.041 28.665 64.041 64.02zm175.66 63.964h-67.935c-7.275 0-13.186-5.911-13.186-13.186 0-106.354-86.196-192.55-192.552-192.55-7.275 0-13.184-5.911-13.184-13.186V193.066c0-6.936 5.37-12.693 12.285-13.134 162.771-10.364 287.702 114.567 297.711 277.302.441 6.915-5.316 12.285-12.239 12.285zm144.198 0h-67.926c-7.276 0-13.187-5.911-13.187-13.186 0-185.815-150.559-336.375-336.381-336.375-7.275 0-13.184-5.911-13.184-13.186V49.066c0-6.936 5.371-12.693 12.285-13.134 242.023-10.364 427.771 175.384 429.28 417.472.441 6.915-5.316 12.285-12.239 12.285z"/></svg>
+      {{ end }}
+    </span>
+  </a>
+</li>
+{{- end -}}
