@@ -19,7 +19,7 @@ Hazrat Ali completed his master's degree in Nutritional Science in 2021 at the I
 
 ### How did you get started with KaiOS?
 
-In 2013, while still in college, I began my journey with web development. At that time, I experimented with creating websites for mobile devices using tools like [Wapka](https://www.wapka.co/) and [XtGem](XtGem), which sparked my interest in the field. Fast forward to 2020, when I came across a Facebook promotion about the KaiOS device launch in Bangladesh. I was intrigued by the fact that KaiOS apps were built with HTML5, a technology I was already familiar with.
+In 2013, while still in college, I began my journey with web development. At that time, I experimented with creating websites for mobile devices using tools like [Wapka](https://www.wapka.co/) and [XtGem](https://xtgem.com/), which sparked my interest in the field. Fast forward to 2020, when I came across a Facebook promotion about the KaiOS device launch in Bangladesh. I was intrigued by the fact that KaiOS apps were built with HTML5, a technology I was already familiar with.
 
 Recognizing this as an exciting opportunity, **I took advantage of the COVID-19 break from my academic classes to delve into KaiOS development**. My first project was [kiNET TV](https://kaios.app/apps/t1t0_OrEVHfMC-3G-aRm), a live TV streaming app. It was a fulfilling experience to bring this project to life and it's one of the most used apps by KaiOS device users.
 

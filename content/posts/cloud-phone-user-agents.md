@@ -24,7 +24,7 @@ Cloud Phone user agents follow a [consistent pattern](https://developer.cloudfon
 **User Agent Components**
 
 * `Cloud Phone` identifies all Cloud Phone devices
-* `Puffin` identifies the remote-browser architecture shared with the [Puffin browser](puffin.com)
+* `Puffin` identifies the remote-browser architecture shared with the [Puffin browser](https://puffin.com)
 * `Nokia 225 4G` is the device model name. `Generic` is used by the Cloud Phone Simulator or pre-production devices
 * `Chrome/128.0.6613.170` identifies the Chromium version used by Cloud Phone servers
 

@@ -15,7 +15,7 @@
           Copyright &copy; {{ .Site.Title }} {{ now.Format "2006" }}
         {{- end }}
         <br />
-        <small>Except as otherwise noted, the content of this page is licensed under the <a href="https://creativecommons.org/licenses/by/4.0/" rel="external noopener" referrerpolicy="strict-origin-when-cross-origin" target="_blank">Creative Commons Attribution 4.0 License</a>, and code samples are licensed under the <a href="https://www.apache.org/licenses/LICENSE-2.0" rel="external noopener" referrerpolicy="strict-origin-when-cross-origin" target="_blank">Apache 2.0 License</a>. Use of this site is subject to certain terms, see our <a href="/privacy">Privacy Policy</a>.</small>
+        <small>Except as otherwise noted, the content of this page is licensed under the <a href="https://creativecommons.org/licenses/by/4.0/" rel="external noopener" referrerpolicy="strict-origin-when-cross-origin" target="_blank">Creative Commons Attribution 4.0 License</a>, and code samples are licensed under the <a href="https://www.apache.org/licenses/LICENSE-2.0" rel="external noopener" referrerpolicy="strict-origin-when-cross-origin" target="_blank">Apache 2.0 License</a>. Use of this site is subject to certain terms, see our <a href="{{ relref . "privacy" }}">Privacy Policy</a>.</small>
         </p>
         <p class="copyright text-muted">
           Last updated on <time datetime="{{ now.Format "2006-01-02" }}">{{ now.Format "2006-01-02" }}</time>
