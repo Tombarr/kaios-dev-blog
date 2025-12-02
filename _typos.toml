@@ -4,4 +4,7 @@ tunning = "tunning"
 pn = "pn"
 
 [files]
-extend-exclude = ["themes/**"]
+extend-exclude = [
+    "themes/**",
+    "assets/**"
+]
