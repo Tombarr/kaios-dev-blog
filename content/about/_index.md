@@ -9,22 +9,25 @@ header_img = "img/home-alt.png"
 categories = []
 +++
 
-[KaiOS.dev](https://kaios.dev) is written by [Tom Barrasso](https://barrasso.me). Currently the Head of Developer Relations at [Cloud Phone](https://developer.cloudphone.tech/), Tom helps developer bring modern digital services to affordable mobile devices. Tom has developed for feature phones since early 2020, learning by experience how to design, build, and scale the best experiences on budget devices aimed at serving the next billion internet users.
+[KaiOS.dev](https://kaios.dev) is written by [Tom Barrasso](https://barrasso.me). Previously the Head of Developer Relations at [Cloud Phone](https://developer.cloudphone.tech/), Tom helped many developers bring modern digital services to affordable mobile devices. Tom has developed for feature phones since early 2020, learning by experience how to design, build, and scale the best experiences on budget devices aimed at serving the next billion internet users.
 
 Tom is the founder and developer of [PodLP](https://podlp.com), the first and most popular podcast app for KaiOS and Cloud Phone. PodLP surpassed 10M+ installs around the world and was a [2020 KaiOS Staff Pick](https://www.kaiostech.com/2020-most-popular-kaios-apps/). It is available for free on the [KaiStore](https://www.kaiostech.com/store/apps/?bundle_id=com.podlp.podlp), JioStore, and Cloud Phone. Learn more about Tom's journey by listening to recent podcast interviews on [Frontend.fm](https://frontend.fm/episodes/4-tom-barrasso/) and [HTML All The Things](https://www.htmlallthethings.com/podcasts/why-flip-phones-still-matter-in-2025-w-tom-barrasso).
 
 Readers of KaiOS.dev may also find the following resources helpful:
 
+* [KaiOS.dev Source Code](https://github.com/Tombarr/kaios-dev-blog)
 * [KaiOS Developer Portal](https://developer.kaiostech.com/)
 * [KaiStore Submission Portal](https://developer.kaiostech.com/subpo/)
 * [Waterfox Classic](https://classic.waterfox.net/)
 * [r/KaiOS Reddit](https://www.reddit.com/r/KaiOS/)
 * [r/KaiOS Discord](https://discord.gg/r-kaios-472006912846594048)
 * [BananaHackers](https://sites.google.com/view/bananahackers/home)
+* [`kaios-types` Library](https://github.com/Tombarr/kaios-types)
 * [@Tombarr on GitHub](https://github.com/tombarr/)
 * [KaiOS.app](https://kaios.app)
 * [Cloud Phone Developer Program](https://www.cloudphone.tech/developer-program)
 * [Cloud Phone for Developers](https://developer.cloudphone.tech/)
+* [Cloud Phone GitHub](https://github.com/cloudmosa/)
 
 **KaiOS**, built on top of Firefox OS, allows developers to build scaled-down web applications that run on low-end phones, most of which are equipped with 4G, Wi-Fi, 240x320 non-touch screens, D-pad navigation, a T9 keyboard, and VGA camera. This format is perfect for simple applications and classic arcade games. With less than 2,000 total applications and games available, it's much easy to stand out on the KaiStore than on the Google Play Store for Android or the App Store for iOS.
 

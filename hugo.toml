@@ -3,6 +3,10 @@ languageCode = "en-us"
 title = "KaiOS.dev"
 
 theme = "puppet"
+useFaviconGenerator = true
+disableHugoGeneratorInject = true
+enableRobotsTXT = true
+enableGitInfo = true
 
 copyright = "Copyright © 2023-2025. Last Byte LLC"
 defaultContentLanguage = "en"
@@ -83,21 +87,20 @@ refLinksErrorLevel = "WARNING"
       noNullishOperator = false
       precision = 0
 
-[author]
-  name = 'Tom Barrasso'
-
 [params]
-  author = "Tom Barrasso"
   tagsLimit = 20
   description = "Build modern experiences on KaiOS mobile phones"
   keywords = "KaiOS,developer,blog,software,guide,web,mobile,JavaScript,CSS,HTML,Firefox"
   img_home = "img/home-alt.png"
   img_404 = "img/404-bg.jpg"
 
-useFaviconGenerator = true
-disableHugoGeneratorInject = true
-enableRobotsTXT = true
-enableGitInfo = true
+[params.author]
+  name = "Tom Barrasso"
+  url = "https://tombarrasso.com"
+
+## llms.txt
+[params.robots]
+  llmsTXT = true
 
 [frontmatter]
   lastmod = ["lastmod", ":git", "date", "publishDate"]
@@ -114,7 +117,7 @@ custom_css = [] # ["css/custom.css"]  Add your file to assets folder  [assets/cs
   enable = true
   # Overwritten by your gravatar image if `gravatarEmail` is filled
   avatar = "/img/tom-barrasso.jpg"
-  bio = "Tom Barrasso is the Head of Developer Relations at CloudMosa and founder of PodLP, the first podcast app for KaiOS, the JioPhone, and Cloud Phone with 10M+ installs in over 175 countries."
+  bio = "Tom Barrasso was the Head of Developer Relations at CloudMosa and founder of PodLP, the first podcast app for KaiOS, the JioPhone, and Cloud Phone with 10M+ installs in over 175 countries."
 
 [params.giscus]
   enable = false
