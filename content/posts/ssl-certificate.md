@@ -2,6 +2,7 @@
 title = "Advanced KaiOS Development - CORS, TCP Sockets, and Let's Encrypt SSL Certificates"
 description = "Disabling the Same Origin Policy (CORS), Navigator.mozTCPSocket, and issues with SSL certificates"
 date = 2023-02-02T00:00:00+08:00
+lastmod = 2025-12-30T00:00:00+08:00
 toc = true
 draft = false
 tags = ["KaiOS", "CORS", "Let's Encrypt", "Socket", "SSL Certificate", "Permissions", "Security"]
@@ -10,7 +11,7 @@ series = ["Advanced Development"]
 header_img = "img/home-alt.png"
 +++
 
-Learn more about disabling CORS, `Navigator.mozTCPSocket`, and issues with Let's Encrypt certificates on KaiOS
+Learn more about disabling CORS, `Navigator.mozTCPSocket`, and issues with Let's Encrypt and Sectigo certificates on KaiOS
 
 ## `XMLHttpRequest` without CORS
 
@@ -70,7 +71,19 @@ In September 2021, the IdenTrust DST Root CA X3 root certificate used by Let's E
 
 ![Untrusted Connection Warning on KaiOS](/img/ssl-error.png "KaiOS screenshot of anchor.fm with expired LE root certificate")
 
-As a developer, this means that XMLHttpRequest and Fetch requests to hosts using LE certificates will silently fail with no catchable error. Fortunately, while XHR does not expose the necessary error messages, it is possible to detect invalid SSL Certificates on KaiOS using `mozTCPSocket`. The function below returns a `Promise` that resolves to `true` when the `SecurityCertificate` is thrown.
+As a developer, this means that XMLHttpRequest and Fetch requests to hosts using LE certificates will silently fail with no catchable error.
+
+### Sectigo USERTrust RSA
+
+In [October 2025](https://www.sectigo.com/resource-library/changes-to-root-ca-hierarchies-and-trust-status), Sectigo migrated all certificate issuance from its "legacy" multi-purpose Root CAs to modern single-purpose Root CAs. Similar to Let's Encrypt, legacy roots such as COMODO and USERTrust lost trust in KaiOS. Unlike Let's Encrypt, KaiOS Technologies has not published an update via the KaiStore to fix this. That means **Sectigo SSL certificates should not be used on KaiOS 2.5**.
+
+### Recommended Certificate Authorities (CA)
+
+KaiOS itself hosts APIs on Amazon Web Services (AWS), leveraging [Amazon Certificate Manager](https://aws.amazon.com/certificate-manager/) (ACM) for SSL certificates and serving traffic via AWS Cloudfront. Cloudflare and Google Trust Services (GTS) are also still supported. It's best to use certificates issued by these providers, and fortunately these CAs typically offer certificates at no cost.
+
+## Certificate Detection
+
+Fortunately, while XHR does not expose the necessary error messages, it is possible to detect invalid SSL Certificates on KaiOS using `mozTCPSocket`. The function below returns a `Promise` that resolves to `true` when the `SecurityCertificate` is thrown.
 
 ```js
 // @returns [Promise<Boolean|null>] True if the host has an invalid SSL certificate
