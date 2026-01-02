@@ -36,8 +36,17 @@ jobs:
           HUGO_ENV_GIT_COMMIT_HASH: ${{ github.sha }}
         run: hugo --minify --gc --cleanDestinationDir --environment production
 
+      - name: Check deployment conditions
+        id: check-deploy
+        run: |
+          if [ -n "${{ secrets.CLOUDFLARE_API_TOKEN }}" ]; then
+            echo "should_deploy=true" >> $GITHUB_OUTPUT
+          else
+            echo "should_deploy=false" >> $GITHUB_OUTPUT
+          fi
+
       - name: Deploy to Cloudflare Pages
-        if: secrets.CLOUDFLARE_API_TOKEN != '' && github.event_name != 'pull_request'
+        if: steps.check-deploy.outputs.should_deploy == 'true' && github.event_name != 'pull_request'
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
