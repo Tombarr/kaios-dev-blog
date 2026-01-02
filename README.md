@@ -9,6 +9,7 @@ This project includes a [DevContainer](https://containers.dev/) setup with Hugo,
 ### Local Server
 
 ```bash
+git submodule update --init --recursive
 hugo server --bind 0.0.0.0 --disableFastRender --noHTTPCache
 ```
 

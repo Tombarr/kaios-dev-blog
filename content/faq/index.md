@@ -2,6 +2,7 @@
 title = "FAQ"
 description = "KaiOS FAQs"
 date = 2023-02-17T00:00:00+08:00
+lastmod = 2026-01-01T01:17:00+00:00
 toc = true
 draft = false
 unlisted = true
@@ -14,13 +15,13 @@ header_img = "img/home-alt.png"
 
 ### What hardware specifications do KaiOS phones have?
 
-* 240x320 ~2.4-3" displays
-* 256mb or 512mb RAM
-* 3G or 4G
+* 240x320 ~2.4-3.2" displays
+* 256mb, 512mb, or 1GB RAM
+* 3G, 4G, or 5G
 * ARM CPUs
   * Qualcomm, Spreadtrum & Mediatek
-  * ~1GHz - 1.3GHz
-  * Dual or Quad Core
+  * 1.0GHz - 2.0GHz
+  * Dual-core, Quad-core, or Octa-core
 * T9 or QWERTY keyboards
 * D-Pad & Soft-Key (LSK & RSK) navigation
 * WiFI & Bluetooth (optional)
@@ -29,16 +30,16 @@ header_img = "img/home-alt.png"
 
 No. KaiOS has a number of popular apps, including:
 
-* Facebook
-* WhatsApp
 * YouTube
 * Google Assistant
 * Google Search
 * Google Maps
 * Microsoft Outlook
 
-As of February 2023, most other popular social network, music streaming, chat, or shopping apps are not available. The following are **not officially available on KaiOS**:
+As of January 2026, most other popular social network, music streaming, chat, or shopping apps are not available. The following are **not officially available on KaiOS**:
 
+* Facebook
+* WhatsApp
 * Gmail (use default Email app)
 * Discord
 * Amazon
@@ -50,30 +51,34 @@ As of February 2023, most other popular social network, music streaming, chat, o
 
 ### Does KaiOS have group messaging?
 
-No, KaiOS does not support group text messages (SMS or MMS). Also KaiOS does not support Rich Communication Services (RCS) used by modern Android phones as a substitute for Apple's iMessage.
+Some KaiOS devices running 2.5.x do support group text messages (SMS and MMS), such as the [Cingular Flex 4G]({{< ref "all-kaios-phones#kaios-phones" >}} "KaiOS Phones"), however most do not. 
+
+All devices running KaiOS 3.0 or higher support group text messages (SMS and MMS). 
+
+All versions of KaiOS do not support Rich Communication Services (RCS) used by modern Android phones as a substitute for Apple's iMessage.
 
 ### Is KaiOS open source?
 
 KaiOS is a proprietary operating system based on Firefox OS, which was released under the "file-level" Mozilla Public License (MPL) 2.0. Parts of KaiOS source is available on [KaiOS Tech's GitHub](https://github.com/kaiostech/gecko-b2g).
 
-### What's the difference between KaiOS 2.5 and 3.0?
+### What's the difference between KaiOS 2.5, 3.X, and 4.0?
 
 Thanks to a combination of hardware and software upgrades, newer KaiOS 3.0 devices are noticeably smoother than older models running KaiOS 2.5. From a user perspective, there's little discernible difference. Most of the changes are under the hood. Here's a summary of key differences.
 
-|          | KaiOS 2.5     | KaiOS 3.0 |
-|--------------|-----------|------------|
-| Availability      | Global | US-only       |
-| Apps | 1300+      | 420        |
-| Gecko Engine | v48      | v84        |
-| ECMAScript      | ES2015 | ES2021       |
-| PWAs      | No | Yes       |
-| WebP      | No | Yes       |
-| App Origin      | `app://app_name.com` | `http://app_name.localhost`       |
-| Manifest      | `manifest.webapp` | `manifest.webmanifest`       |
-| WASM      | [asm.js](https://developer.mozilla.org/en-US/docs/Games/Tools/asm.js) | Yes       |
-| Debug Enabled      | Select Models | No       |
+|               | KaiOS 2.5                                                             | KaiOS 3.X                   | KaiOS 4.0                   |
+|---------------|-----------------------------------------------------------------------|-----------------------------|-----------------------------|
+| Availability  | Global                                                                | US-only                     | US-only                     |
+| Apps          | 1300+                                                                 | 420                         |                             |
+| Gecko Engine  | v48                                                                   | v84                         | v123                        |
+| ECMAScript    | ES2015                                                                | ES2021                      | ES2021                      |
+| PWAs          | No                                                                    | Yes                         | Yes                         |
+| WebP          | No                                                                    | Yes                         | Yes                         |
+| App Origin    | `app://app_name.com`                                                  | `http://app_name.localhost` | `http://app_name.localhost` |
+| Manifest      | `manifest.webapp`                                                     | `manifest.webmanifest`      | `manifest.webmanifest`      |
+| WASM          | [asm.js](https://developer.mozilla.org/en-US/docs/Games/Tools/asm.js) | Yes                         | Yes                         |
+| Debug Enabled | Select Models                                                         | No                          | No                          |
 
-<u>Note</u>: Many popular apps like Facebook and WhatsApp are not available on KaiOS 3.0. Additionally, you **cannot sideload apps on KaiOS 3.0** so it's not possible to debug apps on KaiOS 3.0 devices.
+<u>Note</u>: You **cannot sideload apps on KaiOS 3.X or KaiOS 4.0** so it's not possible to debug apps on KaiOS 3.X or KaiOS 4.0 devices.
 
 ### Can KaiOS 2.5 devices update to KaiOS 3.0?
 
@@ -85,7 +90,7 @@ No. It might be possible to port older versions of Android or MocorDroid to KaiO
 
 ### Is there a BlackBerry-like KaiOS phone with a QWERTY keyboard?
 
-There are two, the [JioPhone 2]({{< ref "whats-next-jiophone#jiophone-2" >}} "JioPhone 2")) (India-only), and the [Xandos X5](https://www.imei.info/phonedatabase/xandos-x5/) (3G only).
+There are two, the [JioPhone 2]({{< ref "whats-next-jiophone#jiophone-2" >}} "JioPhone 2") (India-only), and the [Xandos X5](https://www.imei.info/phonedatabase/xandos-x5/) (3G only).
 
 ### Can KaiOS run Android apps?
 
