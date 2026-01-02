@@ -37,6 +37,7 @@ jobs:
         run: hugo --minify --gc --cleanDestinationDir --environment production
 
       - name: Deploy to Cloudflare Pages
+        if: ${{ secrets.CLOUDFLARE_API_TOKEN != '' && github.event_name != 'pull_request' }}
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
