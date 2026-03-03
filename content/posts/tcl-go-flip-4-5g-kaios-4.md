@@ -2,13 +2,15 @@
 title = "A closer look at the TCL Go Flip 4 5G and KaiOS 4.0"
 description = "Exploring and revisiting security and privacy on KaiOS 4.0 and the TCL Go Flip 4 5G"
 date = 2026-03-02T00:00:00+08:00
-lastmod = 2026-03-02T00:00:00+08:00
+lastmod = 2026-03-03T00:00:00+08:00
 toc = true
 draft = false
-header_img = "img/home-alt.png"
+header_img = "img/TCL-Go-Flip-4-5G.jpeg"
 tags = ["KaiOS", "Security", "KaiOS 4.0", "TCL"]
 categories = []
 series = ["Advanced Development"]
+[params]
+  featured_img = "img/TCL-Go-Flip-4-5G.jpeg"
 +++
 
 The TCL Go Flip 4 5G (commercial reference `T440W-EATBUS1-V` for T-Mobile) is the first device to ship with KaiOS 4.0. Given that [CVE-2023-33294]({{< ref "./CVE-2023-33294" >}}) and [CVE-2023-27108]({{< ref "./CVE-2023-27108" >}}) were discovered on the original Alcatel Go Flip 4 running KaiOS 3.0, it was worth checking whether these issues carried forward to new hardware.
@@ -17,7 +19,9 @@ The TCL Go Flip 4 5G (commercial reference `T440W-EATBUS1-V` for T-Mobile) is th
 
 ## ADB & Developer Mode Access
 
-Unlike previous Go Flip models, developer mode is surprisingly easy to enable! This may be an accident, since the build on my Flip 4 5G is signed using `test-keys`. Here's the build fingerprint from 
+![Screenshots from the TCL Go Flip 4 5G](/img/gf4-5g-screenshots.png "Screenshots from the TCL Go Flip 4 5G")
+
+Unlike previous Go Flip models, developer mode is surprisingly easy to enable! This may be an accident, since the build on my Flip 4 5G is signed using `test-keys`. Here's the build fingerprint:
 
 ```ini
 ro.system_dlkm.build.fingerprint=TCL/gflip5gtmo/gflip5gtmo:14/UKQ1.241125.001/jenkins05072152:user/test-keys
@@ -40,7 +44,7 @@ w2d.start()
   .then(() => console.log("Developer Tools opened!"));
 ```
 
-Making a surprising return is the secret Konami Code in the Settings app! Navigate to **Settings > Device > Device Info > More Info**, the following soft key sequence opens a hidden menu:
+Making a surprising return is the secret Konami Code in the Settings app! Navigate to **Settings > Device > Device Info > More Info**. The following soft key sequence opens a hidden menu:
 
 ```text
 SoftLeft SoftLeft SoftRight SoftLeft SoftRight SoftRight
@@ -72,7 +76,7 @@ pref("devtools.debugger.unix-domain-socket", "/data/local/firefox-debugger-socke
 pref("devtools.debugger.remote-port", 6000);
 ```
 
-## CVE-2023-33294: `tctweb_server` Ensures
+## CVE-2023-33294: `tctweb_server` Endures
 
 [CVE-2023-33294]({{< ref "./CVE-2023-33294" >}}) documented that the `/system/bin/tctweb_server` binary on KaiOS 3.0 exposed an unauthenticated HTTP server on port 2929 that would execute arbitrary commands as root. This binary disappeared in KaiOS 3.1, but possibly because it's TCL-specific and the only KaiOS 3.1 devices were from other vendors like Nokia.
 
@@ -118,7 +122,7 @@ This is exactly the mitigation recommended in the original CVE write-up. Calls t
 
 The following has yet to be confirmed. Like nearly every previous KaiOS version, the Engmode API (`navigator.b2g.engmodeManager`) is limited to Core apps with the `engmode` permission. It also appears to perform complex input sanitization before passing commands off to `EngmodeService`.
 
-On potential target for command injection is the `updateAtmPressure` method, which constructs a shell command by string concatenation:
+One potential target for command injection is the `updateAtmPressure` method, which constructs a shell command by string concatenation:
 
 ```js
 updateAtmPressure(pressure) {
@@ -148,13 +152,13 @@ updateAtmPressure(pressure) {
 }
 ```
 
-The `pressure` value is passed directly into the shell command string. The validation — a range check and a regex applied to `JSON.stringify(pressure)` – intends to restrict input to a decimal number. However, the `JSON.stringify` call wraps string inputs in quotes, so the regex will reject string inputs that would otherwise pass the float check. If `pressure` is a Number rather than a String, the regex comparison behaves as intended.
+The `pressure` value is passed directly into the shell command string. The validation — a range check and a regex applied to `JSON.stringify(pressure)` — is intended to restrict input to a decimal number. However, the `JSON.stringify` call wraps string inputs in quotes, so the regex will reject string inputs that would otherwise pass the float check. If `pressure` is a Number rather than a String, the regex comparison behaves as intended.
 
 ## Other Changes
 
-### Copy/ Paste
+### Copy/Paste
 
-KaiOS 4.0 supports copy-paste using it's own API.
+KaiOS 4.0 supports copy-paste using its own API.
 
 ```js
 // Copy text and show transient UI
@@ -183,11 +187,11 @@ root_path = "/data/local/webapps/vroot"
 csp = "default-src * data: blob:; script-src 'self' http://127.0.0.1 http://shared.localhost; object-src 'none'; style-src 'self' 'unsafe-inline' http://shared.localhost"
 ```
 
-As user @Cyan2048 noted on Discord, the CSP notably does not include `wasm-unsafe-eval`. This effectively **blocks packaged apps from using WebAssembly (Wasm)** on KaiOS 4.0.
+As user @Cyan2048 noted on Discord, the CSP notably does not include [`wasm-unsafe-eval`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Security-Policy/script-src#unsafe_webassembly_execution). This effectively **blocks packaged apps from using WebAssembly (Wasm)** on KaiOS 4.0.
 
 ### Random Finds
 
-The System app once again offers a `show-toast` activity that draws an alert window on the top of the screen. In previous KaiOS versions, this was sometimes restricted. In KaiOS 4.0, any app (or website) can use it.
+The System app once again offers a `show-toast` activity that draws an alert window at the top of the screen. In previous KaiOS versions, this was sometimes restricted. In KaiOS 4.0, any app (or website) can use it.
 
 ```js
 const showToast = new WebActivity("show-toast", {
@@ -209,7 +213,26 @@ const reboot = new WebActivity("reboot-device", {
 reboot.start();
 ```
 
-The KaiStore also offers many open activities including `kaistore-get-silent-apps`, used by the System app to silently pre-install apps that the user cannot later delete. The only time this isn't triggered is when the phone is set to "Kids Mode" via the `kids.mode.enabled` boolean Device Setting (which probably has wider implications).
+The KaiStore also offers many open activities including `kaistore-get-silent-apps`, used by the System app to silently pre-install apps that the user cannot later delete.
+
+#### Kids Mode
+
+The only time apps aren't silently installed is when the phone is set to "Kids Mode" via the `kids.mode.enabled` boolean Device Setting. This can be toggled from Settings > Account > Kids Mode > On. Kids Mode enables age-based restrictions limiting the available apps (removes social media, games, and the KaiStore) as well as blocking certain access from the browser.
+
+#### Special Keys
+
+Like most TCL devices, there are several shortcut keys on the TCL Go Flip 4 5G including:
+
+* `QdCall` - the phone icon on the flip cover that launches the Camera when double clicked
+* `Message` - the message bubble icon used to launch SMS Messages
+* `FavoriteContacts` - the star button used to launch the Contacts app
+* `MicrophoneToggle` - the center "OK" button triggers this key, instead of `Enter`
+
+Interestingly, apps and websites are able to intercept these keys. Apps can also `preventDefault`, but websites cannot.
+
+#### Voice Input
+
+Unlike earlier KaiOS versions, there is no system-wide speech-to-text (STT) on KaiOS 4.0. The Device Preference `voice-input.enabled` is set to `false` and there is no pre-installed application to respond to the `voice-input` activity.
 
 ## Conclusion
 
