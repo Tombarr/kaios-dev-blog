@@ -17,7 +17,13 @@ The TCL Go Flip 4 5G (commercial reference `T440W-EATBUS1-V` for T-Mobile) is th
 
 ## ADB & Developer Mode Access
 
-Unlike previous Go Flip models, developer mode is surprisingly easy to enable! This may be an accident, since the build my Flip 4 5G runs uses `test-keys`. Either way, I was able to use standard secret dialer codes:
+Unlike previous Go Flip models, developer mode is surprisingly easy to enable! This may be an accident, since the build on my Flip 4 5G is signed using `test-keys`. Here's the build fingerprint from 
+
+```ini
+ro.system_dlkm.build.fingerprint=TCL/gflip5gtmo/gflip5gtmo:14/UKQ1.241125.001/jenkins05072152:user/test-keys
+```
+
+Either way, I was able to use standard secret dialer codes:
 
 * `*#*333284#*#*` — developer mode
 * `*#8378269#` — launch Engmode app
@@ -143,6 +149,67 @@ updateAtmPressure(pressure) {
 ```
 
 The `pressure` value is passed directly into the shell command string. The validation — a range check and a regex applied to `JSON.stringify(pressure)` – intends to restrict input to a decimal number. However, the `JSON.stringify` call wraps string inputs in quotes, so the regex will reject string inputs that would otherwise pass the float check. If `pressure` is a Number rather than a String, the regex comparison behaves as intended.
+
+## Other Changes
+
+### Copy/ Paste
+
+KaiOS 4.0 supports copy-paste using it's own API.
+
+```js
+// Copy text and show transient UI
+const copyActivity = new WebActivity("copy-content-view", {
+  content: "copy this text",
+});
+
+copyActivity.start();
+
+// Displays a dialog showing how copy-paste works
+const tutorialDialog = new WebActivity("show-copyPaste-guide");
+
+tutorialDialog.start();
+```
+
+Both `navigator.clipboard.writeText` and `navigator.clipboard.readText()` appear to work, but haven't been tested cross-process. This functionality is gated behind a boolean Device Setting, `copypaste.enabled`, which is enabled by default on the Flip 4 5G. It can be disabled from the Developer Menu.
+
+
+### Content Security Policy (CSP)
+
+Unlike KaiOS 2.5, the [content security policy (CSP)]({{< ref "./security_privacy_considerations#content-security-policy-csp" >}}) for apps is not determined by Device Settings. Instead, `api-daemon` is responsible for serving apps and sets one CSP for packaged apps.
+
+```toml
+[vhost]
+root_path = "/data/local/webapps/vroot"
+csp = "default-src * data: blob:; script-src 'self' http://127.0.0.1 http://shared.localhost; object-src 'none'; style-src 'self' 'unsafe-inline' http://shared.localhost"
+```
+
+As user @Cyan2048 noted on Discord, the CSP notably does not include `wasm-unsafe-eval`. This effectively **blocks packaged apps from using WebAssembly (Wasm)** on KaiOS 4.0.
+
+### Random Finds
+
+The System app once again offers a `show-toast` activity that draws an alert window on the top of the screen. In previous KaiOS versions, this was sometimes restricted. In KaiOS 4.0, any app (or website) can use it.
+
+```js
+const showToast = new WebActivity("show-toast", {
+  title: "Toast Title",
+  text: "This is a longer message...",
+  timeout: 5000,
+});
+
+showToast.start();
+```
+
+Another unusual one is the `reboot-device` activity, which lets apps (or websites) request to reboot the phone. This requires user confirmation, but could still be annoying.
+
+```js
+const reboot = new WebActivity("reboot-device", {
+  appName: "Secret"
+});
+
+reboot.start();
+```
+
+The KaiStore also offers many open activities including `kaistore-get-silent-apps`, used by the System app to silently pre-install apps that the user cannot later delete. The only time this isn't triggered is when the phone is set to "Kids Mode" via the `kids.mode.enabled` boolean Device Setting (which probably has wider implications).
 
 ## Conclusion
 
