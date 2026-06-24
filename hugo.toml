@@ -1,5 +1,5 @@
 baseURL = "https://kaios.dev"
-languageCode = "en-us"
+locale = "en-us"
 title = "KaiOS.dev"
 
 theme = "puppet"
@@ -76,7 +76,7 @@ refLinksErrorLevel = "WARNING"
   [minify.tdewolff]
     [minify.tdewolff.html]
       keepComments = false
-      keepConditionalComments = true
+      keepSpecialComments = true
       keepDefaultAttrVals = true
       keepDocumentTags = true
       keepEndTags = true
