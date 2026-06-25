@@ -17,13 +17,19 @@ jobs:
       deployments: write
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           submodules: recursive   # Fetch Hugo themes (if any)
           fetch-depth: 0          # Fetch all history for .GitInfo and .Lastmod
 
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: "lts/*"
+          cache: "npm"
+
       - name: Check for typos
-        uses: crate-ci/typos@master
+        uses: crate-ci/typos@v1
 
       - name: Setup Hugo
         uses: peaceiris/actions-hugo@v3
