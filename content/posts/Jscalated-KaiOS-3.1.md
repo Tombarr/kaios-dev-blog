@@ -64,7 +64,7 @@ This creates a script element with the source [https://jscalated.netlify.app/adb
 
 ## The Tool and Its Features
 
-As of now, it has four capabilities. Firstly it has the ability to start a relay that pings a local (or remote) server for shell commands. The server and its usage instructions can be found at [kaios-agent.netlify.app](https://kaios-agent.netlify.app). It can also enable ADB on any KaiOS 3.1 phone as long as the phone's `/data/misc/` directory and its sub-directories are B2G-accessible (most KaiOS SELinux policies should allow it). The third feature is disabling preinstalled apps. The important apps are protected from being disabled by JScalated, although it is possible to modify them using the third feature which is a B2G root shell restricted by SELinux.
+As of now, it has three capabilities. Firstly it has the ability to start a relay that pings a local (or remote) server for shell commands. The server and its usage instructions can be found at [kaios-agent.netlify.app](https://kaios-agent.netlify.app). It can also enable ADB on any KaiOS 3.1 phone as long as the phone's `/data/misc/` directory and its sub-directories are B2G-accessible (most KaiOS SELinux policies should allow it). The third feature is disabling preinstalled apps. The important apps are protected from being disabled by JScalated, although it is possible to modify them using a B2G root shell restricted by SELinux.
 
 ![JScalated Tool Javascript Picture](/img/JScalated-Tool.png "JScalated adb.js")
 
