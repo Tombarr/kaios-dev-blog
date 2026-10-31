@@ -71,6 +71,12 @@ The tool has a wide range of capabilities, and more will be added as development
    javascript:document.write(name)
    ```
 
+On some devices, the following may also work for quicker install :
+   ```js
+   javascript:name
+   ```
+
+
 This loads the JavaScript previously staged in `window.name` into the current document. On affected KaiOS builds, the first command is necessary before the staged script can execute.
 
 The `window.name` property is normally used to identify a browsing context. However, in the Firefox 84-based versions of Gecko used by KaiOS 3.0 and 3.1, its value can persist across certain navigations.
